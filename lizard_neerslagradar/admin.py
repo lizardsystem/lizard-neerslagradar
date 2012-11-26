@@ -1,9 +1,7 @@
-# (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-from __future__ import unicode_literals
-
-from django.contrib import admin
-
-from lizard_neerslagradar import models
+from django.contrib.gis import admin
+#from lizard_sticky.models import Sticky, Tag
 
 
-# admin.site.register(models.TODO)
+#admin.site.register(Sticky, admin.GeoModelAdmin)
+#admin.site.register(Sticky)
+#admin.site.register(Tag)

@@ -12,7 +12,14 @@ install_requires = [
     'Django',
     'django-extensions',
     'django-nose',
-    'lizard-ui >= 4.0b5',
+    'lizard-ui >= 4.12',
+    'lizard-map >= 4.10',
+    'numpy',
+    'Pillow',
+    'netCDF4',
+    'python-dateutil',
+    'pyproj',
+    'GDAL',
     ],
 
 tests_require = [

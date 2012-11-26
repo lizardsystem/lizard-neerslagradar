@@ -1,7 +1,13 @@
-# (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-from __future__ import unicode_literals
+import datetime
 
-# from django.db import models
-# from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import User
+from django.contrib.gis.db import models
 
-# Create your models here.
+
+# class Region(models.Model):
+#     """Users are connected to one or more Regions. They are gemeentes,
+#     waterschappen etc."""
+
+#     name = models.CharField(max_length=200)
+#     geometry = models.GeometryField(srid=4326)  # WGS84
+#     objects = models.GeoManager()

@@ -1,9 +1,3 @@
-# (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.rst.
-
 from django.test import TestCase
+from django.test.client import Client
 
-
-class ExampleTest(TestCase):
-
-    def test_something(self):
-        self.assertEquals(1, 1)

@@ -1,0 +1,17 @@
+.coverage
+.installed.cfg
+.mr.developer.cfg
+nosetests.xml
+.#*
+
+bin/
+develop-eggs/
+doc/build/
+htmlcov/
+parts/
+var/
+*.egg-info
+
+*.pyc
+
+test.db

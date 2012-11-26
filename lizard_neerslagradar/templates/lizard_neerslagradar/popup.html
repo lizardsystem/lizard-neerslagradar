@@ -1,0 +1,47 @@
+{% load workspaces %}
+{# header #}
+<div><img src="{{ symbol_url }}"/>&nbsp;</div>
+{# body #}
+<div>
+  <table class="noprint table table-bordered">
+    <thead>
+      <tr>
+        <th>
+          Onderwerp
+        </th>
+        <th>
+          Beschrijving
+        </th>
+        <th>
+          Kernwoorden
+        </th>
+        {% if add_snippet %}
+        <th>
+          Voeg toe
+        </th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+        {% for display_object in display_group %}
+        <tr>
+          <td>{{ display_object.name }}</td>
+          <td>{{ display_object.object.description }}</td>
+          <td>{{ display_object.object.tags.all|join:", " }}</td>
+          {% if add_snippet %}
+          <td>
+            <a href="{% url lizard_map_collage_add %}"
+            class="collage-add ss_star ss_sprite"
+	    data-target-id="#edit-collage"
+	    data-adapter-class="{{ adapter_class }}"
+	    data-adapter-layer-json="{{ adapter_layer_json }}"
+            data-identifier="{{ display_object.identifier|json_escaped }}"
+            data-name="{{ display_object.name }}"
+	    title="Toevoegen aan selectie"></a>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+</div>

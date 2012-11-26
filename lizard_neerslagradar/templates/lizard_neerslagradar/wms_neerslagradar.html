@@ -1,0 +1,37 @@
+{% extends "lizard_map/wms.html" %}
+
+{% block subtitle %} Neerslagradar {% endblock %}
+
+{% block css %}
+  {{ block.super }}
+<link rel="stylesheet"
+      href="{{ STATIC_URL }}lizard_neerslagradar/lizard_neerslagradar.css"
+      type="text/css"
+      media="screen, projection" />
+{% endblock css %}
+
+{% block map-javascript %}
+{{ block.super }}
+<script type="text/javascript"
+        src="http://maps.stamen.com/js/tile.stamen.js?v1.2.0"></script>
+<script type="text/javascript">
+var wms_base_url = '{% url lizard_neerslagradar.wms %}';
+var fixed_image_layer_bbox = '{{ view.bbox }}';
+var fixed_start_dt = '{{ view.start_dt }}';
+</script>
+<script type="text/javascript"
+        src="{{ STATIC_URL }}lizard_neerslagradar/lizard_neerslagradar.js"></script>
+{% endblock %}
+
+{% block sidebar %}
+<h2>Animatie</h2>
+<h3>Voortgang laden radarbeelden</h3>
+<div id="progressbar" class="progress progress-striped active">
+    <div class="bar" style="width: 0%;"></div>
+</div>
+<h3>Besturing animatie</h3>
+<button id="animate" class="btn btn-info"><i class="icon-play"></i> <span>Start animatie</span></button>
+<h3>Tijd</h3>
+<div id="timeslider"></div>
+<div id="currentdt">N.v.t.</div>
+{% endblock %}
