@@ -1,4 +1,4 @@
-from django.contrib.gis import admin
+#from django.contrib.gis import admin
 #from lizard_sticky.models import Sticky, Tag
 
 

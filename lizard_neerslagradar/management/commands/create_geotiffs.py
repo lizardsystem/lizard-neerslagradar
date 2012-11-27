@@ -1,15 +1,15 @@
 from optparse import make_option
 from optparse import OptionParser
 import logging
-import os
-import sys
+#import os
+#import sys
 import contextlib
-import hashlib
+#import hashlib
 import datetime
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from django.db.models import Q
+#from django.db.models import Q
 
 import dateutil
 import netCDF4
@@ -18,15 +18,18 @@ from lizard_neerslagradar import netcdf
 
 logger = logger = logging.getLogger(__name__)
 
+
 class Command(BaseCommand):
     args = ""
     help = "Create a geotiff per timestep from the radar.nc file."
 
     option_list = BaseCommand.option_list + (
-        make_option("--from", action="store", type="string",
-                    dest="from_", default="2011-01-07",
-                    help="Generate geotiffs starting from this datetime. "
-                         "Use a string in the format YYYY-MM-DD HH:MM (fuzzy substrings are allowed)"),
+        make_option(
+            "--from", action="store", type="string",
+            dest="from_", default="2011-01-07",
+            help="Generate geotiffs starting from this datetime. "
+            "Use a string in the format YYYY-MM-DD HH:MM "
+            "(fuzzy substrings are allowed)"),
         make_option("--skip-existing", action="store_true",
                     dest="skip_existing", default=False,
                     help="Skip existing geotiffs"),
@@ -55,4 +58,5 @@ class Command(BaseCommand):
                     netcdf.mk_geotiff(nc, time, path)
                     logger.info('Created geotiff for {}'.format(time))
                 except:
-                    logger.exception('While creating geotiff for {}'.format(time))
+                    logger.exception(
+                        'While creating geotiff for {}'.format(time))

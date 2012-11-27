@@ -1,8 +1,8 @@
 import os
-import contextlib
+#import contextlib
 import logging
-import hashlib
-import datetime
+#import hashlib
+#import datetime
 
 from django.conf import settings
 
@@ -23,16 +23,19 @@ TRANSFORM = osr.CoordinateTransformation(WGS84, GOOGLEMERCATOR)
 
 logger = logging.getLogger(__name__)
 
+
 def time_2_path(datetime):
     formatted = datetime.strftime("%Y-%m-%d-%H-%M")
     #fn = hashlib.md5(str(datetime)).hexdigest() + '.tiff'
     fn = '{}.tiff'.format(formatted)
     return os.path.join(settings.GEOTIFF_DIR, fn)
 
+
 def normalize(arr, tmin=0.0, tmax=1.0):
     fmin = abs(arr.min())
     fmax = abs(arr.max())
     return tmin + (tmax - tmin) * (arr - fmin) / (fmax - fmin)
+
 
 def mk_geotiff(nc, time, path):
     # radar.nc times don't seem timezone aware, so strip
@@ -41,7 +44,9 @@ def mk_geotiff(nc, time, path):
 
     # find the actual data variable
     # data variable is first found that is mapped to the grid
-    data_var = [v for v in nc.variables.itervalues() if hasattr(v, 'grid_mapping')]
+    data_var = [
+        v for v in nc.variables.itervalues()
+        if hasattr(v, 'grid_mapping')]
     if not data_var:
         raise Exception('Could not determine grid mapping')
     data_var = data_var[0]
@@ -63,12 +68,12 @@ def mk_geotiff(nc, time, path):
     x_resolution = abs(right - left) / (len(lons) - 1)
     y_resolution = abs(bottom - top) / (len(lats) - 1)
     geo_transform = [
-        left, # top left x
-        x_resolution, # x resolution (west - east)
-        0, # x rotation
-        top, # top left y
-        0, # y rotation
-        -y_resolution # y resolution (north - south)
+        left,  # top left x
+        x_resolution,  # x resolution (west - east)
+        0,  # x rotation
+        top,  # top left y
+        0,  # y rotation
+        - y_resolution  # y resolution (north - south)
     ]
     geotiff.SetGeoTransform(geo_transform)
 
@@ -88,10 +93,10 @@ def mk_geotiff(nc, time, path):
     normalizer = matplotlib.colors.LogNorm(vmin=0.1, vmax=30)
     normalized = normalizer(vals)
     cmapped = cm.jet(normalized, bytes=True)
-    band1 = cmapped[:,:,0]
-    band2 = cmapped[:,:,1]
-    band3 = cmapped[:,:,2]
-    band4 = cmapped[:,:,3]
+    band1 = cmapped[:, :, 0]
+    band2 = cmapped[:, :, 1]
+    band3 = cmapped[:, :, 2]
+    band4 = cmapped[:, :, 3]
     band4[nans] = 0
 
     geotiff.GetRasterBand(1).WriteArray(band1)

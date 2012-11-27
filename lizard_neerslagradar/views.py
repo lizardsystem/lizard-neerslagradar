@@ -49,10 +49,10 @@ class WmsView(View):
         times = times.split('/')
         if len(times) == 1:
             time_from = dateutil.parser.parse(times[0])
-            time_to = None
+#            time_to = None
         elif len(times) == 2:
             time_from = dateutil.parser.parse(times[0])
-            time_to = dateutil.parser.parse(times[1])
+#            time_to = dateutil.parser.parse(times[1])
         else:
             raise Exception('No time provided')
 
