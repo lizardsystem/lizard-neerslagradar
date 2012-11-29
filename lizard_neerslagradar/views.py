@@ -2,23 +2,76 @@ import logging
 
 from django.http import HttpResponse
 from django.views.generic.base import View
+from django.utils import simplejson as json
 
 import dateutil
 import mapnik
 
-from lizard_map.views import AppView
+import lizard_map.views
+from lizard_map.models import WorkspaceEdit
+from lizard_map import coordinates
 from lizard_ui.layout import Action
 from lizard_neerslagradar import netcdf
+from lizard_neerslagradar import models
 
 logger = logging.getLogger(__name__)
 
 
-class DefaultView(AppView):
+MAP_BASE_LAYER = 'map_base_layer'  # The selected base layer
+
+
+class NeerslagRadarView(lizard_map.views.AppView):
+    def start_extent(self):
+        # Hack: we need to have a session right away for toggling ws items.
+        self.request.session[
+            'make_sure_session_is_initialized'] = 'hurray'
+        # End of the hack.
+
+        extent = models.Region.extent_for_user(self.request.user)
+        logger.debug("In start_extent; extent={0}".format(extent))
+        if extent is None:
+            extent = super(NeerslagRadarView, self).start_extent()
+
+        return extent
+
+
+def map_location_load_default(request):
+    """
+    Return start_extent
+    """
+
+    request.session[MAP_BASE_LAYER] = ''  # Reset selected base layer.
+
+    extent = models.Region.extent_for_user(request.user)
+    if extent:
+        return HttpResponse(json.dumps({'extent': extent}))
+
+    return lizard_map.views.map_location_load_default(request)
+
+
+class DefaultView(NeerslagRadarView):
     template_name = 'lizard_neerslagradar/wms_neerslagradar.html'
-    javascript_hover_handler = ''
-    javascript_click_handler = ''
+
+    def dispatch(self, request, *args, **kwargs):
+        """Add in the omnipresent workspace item, then proceed as normal."""
+
+        workspace_edit = WorkspaceEdit.get_or_create(
+            request.session.session_key, request.user)
+
+        workspace_edit.add_workspace_item(
+            "Neerslagradar", "adapter_neerslagradar", "{}")
+
+        return super(DefaultView, self).dispatch(request, *args, **kwargs)
 
     def bbox(self):
+        logger.debug("In bbox()")
+        extent = models.Region.extent_for_user(self.request.user)
+        if extent:
+            logger.debug(str(extent))
+            bbox = ', '.join((extent['left'], extent['top'],
+                              extent['right'], extent['bottom']))
+            logger.debug("BBOX: {0}".format(bbox))
+            return bbox
         return (
             '148076.83040199202, 6416328.309563829, '
             '1000954.7013451669, 7223311.813260503')

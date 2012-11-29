@@ -89,7 +89,7 @@ var StaticOverviewMap = OpenLayers.Class(OpenLayers.Control.OverviewMap, {
         var resRatio = targetRes / mapRes;
         if(resRatio > this.maxRatio) {
             // zoom in overview map
-            targetRes = this.minRatio * mapRes;            
+            targetRes = this.minRatio * mapRes;
         } else if(resRatio <= this.minRatio) {
             // zoom out overview map
             targetRes = this.maxRatio * mapRes;
@@ -200,8 +200,8 @@ function init_cycle_layers () {
     $.each(layers, function (idx, layer) {
         var dt_iso_8601 = layer.dt.format('YYYY-MM-DDTHH:mm:ss') + '.000Z';
         var wms_params = {
-            WIDTH: 512,
-            HEIGHT: 512,
+            WIDTH: 1024,
+            HEIGHT: 1024,
             SRS: 'EPSG:3857',
             BBOX: bbox.toBBOX(),
             TIME: dt_iso_8601
@@ -211,7 +211,7 @@ function init_cycle_layers () {
             'L' + idx,
             wms_url,
             bbox,
-            new OpenLayers.Size(512, 512),
+            new OpenLayers.Size(1024, 1024),
             {
                 isBaseLayer: false,
                 alwaysInRange: true,
@@ -358,7 +358,7 @@ function set_progress (ratio) {
     var is_ready = ratio == 1;
     if (is_ready) {
         $progressbar.addClass('progress-success').removeClass('active');
-        $btn.removeAttr('disabled'); 
+        $btn.removeAttr('disabled');
         $slider.slider('enable');
     }
     else {
@@ -380,12 +380,6 @@ function wait_until_first_layer_loaded () {
         }
     };
     wait_interval = setInterval(tick, 1000);
-}
-
-function init_background_layer() {
-    map.removeLayer(map.baseLayer);
-    var layer = new OpenLayers.Layer.Stamen('toner-lite');
-    map.addLayer(layer);
 }
 
 function init_overview() {
@@ -417,7 +411,6 @@ function init_overview() {
 }
 
 function init_neerslagradar () {
-    init_background_layer();
     init_overview();
     init_button();
     init_slider();

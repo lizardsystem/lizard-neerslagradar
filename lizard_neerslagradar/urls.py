@@ -15,6 +15,11 @@ urlpatterns = patterns(
         views.WmsView.as_view(),
         name='lizard_neerslagradar.wms'),
     (r'^map/', include('lizard_map.urls')),
+    # Overridden because we do our own thing with the zoom button
+    (r'^map_location_load_default$',
+     'lizard_neerslagradar.views.map_location_load_default',
+     {},
+     'lizard_map.map_location_load_default'),
     )
 
 

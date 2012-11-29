@@ -1,7 +1,5 @@
-#from django.contrib.gis import admin
-#from lizard_sticky.models import Sticky, Tag
+from django.contrib.gis import admin
+from lizard_neerslagradar import models
 
 
-#admin.site.register(Sticky, admin.GeoModelAdmin)
-#admin.site.register(Sticky)
-#admin.site.register(Tag)
+admin.site.register(models.Region, admin.OSMGeoAdmin)
