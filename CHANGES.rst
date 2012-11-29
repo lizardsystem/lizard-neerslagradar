@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.2 (unreleased)
+0.2 (2012-11-29)
 ----------------
 
 - Added regions; regions can be added by a script, connected to users,
