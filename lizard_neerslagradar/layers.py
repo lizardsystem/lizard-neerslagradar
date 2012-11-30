@@ -10,31 +10,137 @@ graph pops up."""
 
 import datetime
 import logging
+import pandas
+from pydap import client
 import pytz
 
 from django.conf import settings
 from django.http import Http404
 
+from lizard_map import coordinates
 from lizard_map import workspace
 from lizard_map.adapter import Graph, FlotGraph
+
+#from lizard_neerslagradar import projections
+from lizard_neerslagradar import models
 
 logger = logging.getLogger(__name__)
 
 
-def get_timeseries(start_date, end_date):
-    pass
+DATASET_URL = 'http://gmdb.lizard.net/thredds/dodsC/radar/radar.nc'
+
+UTC_2000 = pytz.utc.localize(datetime.datetime(2000, 1, 1))
+
+
+def coordinate_to_composite_pixel(lon, lat):
+    rd_x, rd_y = coordinates.wgs84_to_rd(lon, lat)
+
+    minx, maxx, maxy, miny = settings.COMPOSITE_EXTENT
+    cellsize_x, cellsize_y = settings.COMPOSITE_CELLSIZE
+
+    cells_y = (maxy - miny) / cellsize_y
+
+    if not (minx <= rd_x <= maxx) or not (miny <= rd_y <= maxy):
+        return None
+
+    x = int((rd_x - minx) / cellsize_x)
+    y = int(cells_y - ((rd_y - miny) / cellsize_y))
+
+    return (x, y)
+
+
+def minutes_since_2000_to_utc(minutes_since_2000):
+    return UTC_2000 + datetime.timedelta(minutes=minutes_since_2000)
+
+
+def utc_to_minutes_since_2000(utc_datetime):
+    return int((utc_datetime - UTC_2000).total_seconds() / 60)
+
+
+class Timeseries(object):
+    """Class copied from the in-progress lizard-datasource. Should be
+    imported from somewhere later."""
+    def __init__(
+        self,
+        timeseries_dict=None,
+        timeseries_pandas=None,
+        timeseries_times=None, timeseries_values=None):
+        """
+        Can be called with either:
+
+        timeseries_dict, a dict with UTC datetimes as keys and floats
+        as values.
+
+        timeseries_pandas, a pandas timeseries.
+
+        timeseries_times and timeseries_values, two iterables of equal
+        length containing the times (UTC datetimes) and values of the
+        timeseries."""
+        if timeseries_dict is not None:
+            self.timeseries = pandas.Series(timeseries_dict)
+        elif timeseries_pandas is not None:
+            self.timeseries = timeseries_pandas.copy()
+        elif timeseries_times is not None and timeseries_values is not None:
+            self.timeseries = pandas.Series(
+                index=timeseries_times, data=timeseries_values)
+        else:
+            raise ValueError("Timeseries.__init__ called incorrectly.")
+
+    def dates(self):
+        return self.timeseries.keys()
+
+    def values(self):
+        return list(self.timeseries)
+
+
+def get_timeseries(start_date, end_date, identifier):
+    pixel_x, pixel_y = identifier['identifier']
+
+    start_minutes_since_2000 = utc_to_minutes_since_2000(start_date)
+    end_minutes_since_2000 = utc_to_minutes_since_2000(end_date)
+
+    dataset = client.open_url(DATASET_URL)
+
+    selected_dates = ((dataset.time >= start_minutes_since_2000) &
+                      (dataset.time <= end_minutes_since_2000))
+
+    if not any(selected_dates):
+        return None
+
+    dates = [minutes_since_2000_to_utc(d)
+             for d in dataset['time'][selected_dates]]
+
+    series = [max(s, 0)
+              for s in
+              dataset['rain']['rain'][selected_dates, pixel_x, pixel_y]]
+
+    return Timeseries(timeseries_times=dates, timeseries_values=series)
 
 
 class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
     """Registered as adapter_neerslagradar"""
 
     def search(self, google_x, google_y, radius=None):
+        lon, lat = coordinates.google_to_wgs84(google_x, google_y)
+
+        region = models.Region.find_by_point((lon, lat))
+        pixel = coordinate_to_composite_pixel(lon, lat)
+
+        if region is None or pixel is None:
+            logger.debug("Region is None or pixel is None.")
+            return []
+
+        name = '{0}, cel ({1} {2})'.format(region, *pixel)
+
         return [{
                 'distance': 0,
-                'name': 'Dummy',
-                'shortname': 'dmmy',
+                'name': name,
+                'shortname': name,
                 'workspace_item': self.workspace_item,
-                'identifier': {'identifier': None},
+                'identifier': {
+                    'identifier': pixel,
+                    'region_name': region.name
+                    },
                 'google_coords': (google_x, google_y),
                 'object': None
                 }]
@@ -48,9 +154,11 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
             identifiers=identifiers,
             layout_options=layout_options)
 
-    def location(self, identifier, layout=None):
+    def location(self, identifier, region_name, layout=None):
+        name = '{0}, cel ({1} {2})'.format(region_name, *identifier)
+
         return {
-            'name': 'Dummy',
+            'name': name,
             'identifier': identifier,
             }
 
@@ -74,8 +182,6 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         New: this is now a more generalized version of image(), to
         support FlotGraph.
         """
-
-        identifiers = [{}]
 
         logger.debug("_RENDER_GRAPH entered")
         logger.debug("identifiers: {0}".format(identifiers))
@@ -111,7 +217,9 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
                     ls=line_styles[str(identifier)]['avg_linestyle'],
                     label='Gemiddelde %s' % location_name)
 
+        logger.debug("Voor line_styles")
         line_styles = self.line_styles(identifiers)
+        logger.debug("Na line_styles")
 
         today = datetime.datetime.now()
         graph = GraphClass(start_date, end_date, today=today,
@@ -124,14 +232,17 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
 
         is_empty = True
 
-        timeseries = get_timeseries(start_date, end_date)
-
         identifier = identifiers[0]
+        timeseries = get_timeseries(start_date, end_date, identifier)
+
+        logger.debug("Voor check of timeseries None is")
+
         if timeseries is not None:
             is_empty = False
             # Plot data if available.
             dates = timeseries.dates()
             values = timeseries.values()
+
             if values:
                 graph.axes.plot(
                     dates, values,

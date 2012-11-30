@@ -4,6 +4,7 @@ from lizard_map import coordinates
 
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
+from django.contrib.gis.geos import GEOSGeometry
 
 
 class Region(models.Model):
@@ -48,3 +49,17 @@ class Region(models.Model):
             'right': str(max(extent['right'] for extent in extents)),
             'top': str(min(extent['top'] for extent in extents))
             }
+
+    @classmethod
+    def find_by_point(cls, point):
+        """Point is a (lon, lat) coordinate. If this point is in
+        multiple regions, for now we just return the first. Returns
+        None if none found."""
+
+        point_geom = GEOSGeometry('POINT({0} {1})'.format(*point), srid=4326)
+        regions = cls.objects.filter(geometry__contains=point_geom)
+
+        if regions:
+            return regions[0]
+        else:
+            return None

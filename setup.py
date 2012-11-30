@@ -16,6 +16,7 @@ install_requires = [
     'lizard-map >= 4.10',
     'numpy',
     'Pillow',
+    'pandas',
     'netCDF4',
     'python-dateutil',
     'pyproj',

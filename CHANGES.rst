@@ -5,7 +5,10 @@ Changelog of lizard-neerslagradar
 0.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Got a rudimentary dummy graph to work.
+- Graph now shows actual timeseries data from thredds.
+- Date selection functionality now works.
+- Now shows data from the correct grid pixel.
 
 
 0.2 (2012-11-29)
