@@ -2,8 +2,10 @@
 /*jslint browser: true */
 /*global $, OpenLayers, window, map */
 
-function MyLayer (dt) {
+function MyLayer (dt, opacity, bbox) {
     this.dt = dt;
+    this.opacity = opacity;
+    this.bbox = bbox;
     this.ol_layer = null;
 }
 
@@ -114,11 +116,37 @@ var interval_ms = 100;
 var cycle_layers_interval = null;
 var current_layer_idx = -1;
 
-var start_dt = moment.utc(fixed_start_dt);
+var start_dt = moment.utc(lizard_neerslagradar.fixed_start_dt);
 var layers = [];
+var regional_layers = [];
+
+var full_bbox = new OpenLayers.Bounds(
+    lizard_neerslagradar.fixed_image_layer_bbox.split(','));
+
+if (lizard_neerslagradar.user_logged_in) {
+    var regional_bbox = new OpenLayers.Bounds(
+    lizard_neerslagradar.region_bbox.split(','));
+}
 
 for (var i=0; i<288; i+=3) {
-    layers.push(new MyLayer(moment.utc(start_dt).add('minutes', 5 * i)));
+    if (lizard_neerslagradar.user_logged_in) {
+        layers.push(new MyLayer(
+            moment.utc(start_dt).add('minutes', 5 * i),
+            0.2,
+            full_bbox
+        ));
+        regional_layers.push(new MyLayer(
+            moment.utc(start_dt).add('minutes', 5 * i),
+            0.6,
+            regional_bbox
+        ));
+    } else {
+        layers.push(new MyLayer(
+            moment.utc(start_dt).add('minutes', 5 * i),
+            0.6,
+            full_bbox
+        ));
+    }
 }
 
 var layers_loading = 0;
@@ -133,10 +161,18 @@ function set_layer (layer_idx) {
         if (current_layer_idx != -1) {
             var current_layer = layers[current_layer_idx];
             current_layer.ol_layer.setCssVisibility(false);
+            if (lizard_neerslagradar.user_logged_in) {
+                current_layer = regional_layers[current_layer_idx];
+                current_layer.ol_layer.setCssVisibility(false);
+            }
         }
         if (layer_idx != -1) {
             var layer = layers[layer_idx];
             layer.ol_layer.setCssVisibility(true);
+            if (lizard_neerslagradar.user_logged_in) {
+                layer = regional_layers[layer_idx];
+                layer.ol_layer.setCssVisibility(true);
+            }
         }
 
         // update with next layer index
@@ -148,9 +184,13 @@ function set_layer (layer_idx) {
 
 function cycle_layers () {
     var current_layer = layers[current_layer_idx];
-
+    if (lizard_neerslagradar.user_logged_in) {
+        var regional_layer = regional_layers[current_layer_idx];
+    }
     // don't swap layers when we're still loading
-    if (!current_layer.ol_layer.loading) {
+    if (!current_layer.ol_layer.loading &&
+        (!lizard_neerslagradar.user_logged_in ||
+         !regional_layer.ol_layer.loading)) {
         // figure out next layer
         var next_layer_idx = (current_layer_idx >= layers.length - 1) ? 0 : current_layer_idx + 1;
         set_layer(next_layer_idx);
@@ -158,60 +198,22 @@ function cycle_layers () {
 }
 
 function init_cycle_layers () {
-/*
-    $.each(layers, function (idx, layer) {
-        var dt_iso_8601 = layer.dt.format('YYYY-MM-DDTHH:mm:ss') + '.000Z';
-        var ol_layer = new CssHideableWMS(
-            'L' + idx,
-            wms_base_url,
-            {
-                layers: layer.wms_name,
-                time: dt_iso_8601
-            },
-            {
-                buffer: 0,
-                singleTile: true,
-                tileLoadingDelay: 2000,
-                isBaseLayer: false,
-                visibility: true, // keep this, so all layers are preloaded in the browser
-                cssVisibility: false, // hide layer with this custom option
-                displayInLayerSwitcher: false,
-                metadata: layer,
-                eventListeners: {
-                    'loadstart': function () {
-                        layers_loading++;
-                        on_layer_loading_change();
-                    },
-                    'loadend': function () {
-                        layers_loading--;
-                        on_layer_loading_change();
-                    }
-                },
-                projection: 'EPSG:3857'
-            }
-        );
-        map.addLayer(ol_layer);
-
-        layer.ol_layer = ol_layer;
-    });
-*/
-
-    var bbox = new OpenLayers.Bounds(fixed_image_layer_bbox.split(','));
-    $.each(layers, function (idx, layer) {
+    var init_layer = function (idx, layer) {
         var dt_iso_8601 = layer.dt.format('YYYY-MM-DDTHH:mm:ss') + '.000Z';
         var wms_params = {
-            WIDTH: 1024,
-            HEIGHT: 1024,
+            WIDTH: 512,
+            HEIGHT: 512,
             SRS: 'EPSG:3857',
-            BBOX: bbox.toBBOX(),
-            TIME: dt_iso_8601
+            BBOX: layer.bbox.toBBOX(),
+            TIME: dt_iso_8601,
+            OPACITY: layer.opacity
         };
-        var wms_url = wms_base_url + '?' + $.param(wms_params);
+        var wms_url = lizard_neerslagradar.wms_base_url + '?' + $.param(wms_params);
         var ol_layer = new CssHideableImageLayer(
             'L' + idx,
             wms_url,
-            bbox,
-            new OpenLayers.Size(1024, 1024),
+            layer.bbox,
+            new OpenLayers.Size(512, 512),
             {
                 isBaseLayer: false,
                 alwaysInRange: true,
@@ -234,7 +236,12 @@ function init_cycle_layers () {
         );
         map.addLayer(ol_layer);
         layer.ol_layer = ol_layer;
-    });
+    };
+
+    $.each(layers, init_layer);
+    if (lizard_neerslagradar.user_logged_in) {
+        $.each(regional_layers, init_layer);
+    }
 }
 
 function on_layer_changed () {

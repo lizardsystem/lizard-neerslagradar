@@ -9,7 +9,8 @@ Changelog of lizard-neerslagradar
 - Graph now shows actual timeseries data from thredds.
 - Date selection functionality now works.
 - Now shows data from the correct grid pixel.
-
+- Show two animated layers when the user is logged in: whole region
+  with low opacity, and the user's region with high opacity
 
 0.2 (2012-11-29)
 ----------------

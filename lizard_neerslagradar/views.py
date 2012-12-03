@@ -64,7 +64,14 @@ class DefaultView(NeerslagRadarView):
         return super(DefaultView, self).dispatch(request, *args, **kwargs)
 
     def bbox(self):
-        logger.debug("In bbox()")
+        return (
+            '148076.83040199202, 6416328.309563829, '
+            '1000954.7013451669, 7223311.813260503')
+
+    def user_logged_in(self):
+        return str(self.request.user.is_authenticated())
+
+    def region_bbox(self):
         extent = models.Region.extent_for_user(self.request.user)
         if extent:
             logger.debug(str(extent))
@@ -72,9 +79,6 @@ class DefaultView(NeerslagRadarView):
                               extent['right'], extent['bottom']))
             logger.debug("BBOX: {0}".format(bbox))
             return bbox
-        return (
-            '148076.83040199202, 6416328.309563829, '
-            '1000954.7013451669, 7223311.813260503')
 
     def start_dt(self):
         return '2011-01-07T00:00:00.000Z'
@@ -89,6 +93,8 @@ class WmsView(View):
         # WMS standard parameters
         width = int(request.GET.get('WIDTH', '512'))
         height = int(request.GET.get('HEIGHT', '512'))
+        opacity = float(request.GET.get('OPACITY', '0.6'))
+
         bbox = request.GET.get(
             'BBOX',
             '151345.64262053, 6358643.0784661, '
@@ -110,9 +116,9 @@ class WmsView(View):
             raise Exception('No time provided')
 
         path = netcdf.time_2_path(time_from)
-        return self.serve_geotiff(path, width, height, bbox, srs)
+        return self.serve_geotiff(path, width, height, bbox, srs, opacity)
 
-    def serve_geotiff(self, path, width, height, bbox, srs):
+    def serve_geotiff(self, path, width, height, bbox, srs, opacity):
         # Create a map
         mapnik_map = mapnik.Map(width, height)
 
@@ -128,6 +134,7 @@ class WmsView(View):
         s = mapnik.Style()
         r = mapnik.Rule()
         rs = mapnik.RasterSymbolizer()
+        rs.opacity = opacity
         r.symbols.append(rs)
         s.rules.append(r)
         layer.styles.append('geotiff')

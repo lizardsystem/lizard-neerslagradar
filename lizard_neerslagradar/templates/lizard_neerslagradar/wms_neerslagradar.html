@@ -12,12 +12,24 @@
 
 {% block map-javascript %}
 {{ block.super }}
-<script type="text/javascript"
-        src="http://maps.stamen.com/js/tile.stamen.js?v1.2.0"></script>
 <script type="text/javascript">
-var wms_base_url = '{% url lizard_neerslagradar.wms %}';
-var fixed_image_layer_bbox = '{{ view.bbox }}';
-var fixed_start_dt = '{{ view.start_dt }}';
+
+{% comment %} If user isn't logged in, we show an animation of the
+whole area. If he is, we still show the whole animation but should
+give an extra parameter to the view so that it has a low opacity, and
+then we draw a high opacity map of the user's region over it.
+{% endcomment %}
+
+var lizard_neerslagradar = lizard_neerslagradar || {};
+
+lizard_neerslagradar.wms_base_url = '{% url lizard_neerslagradar.wms %}';
+lizard_neerslagradar.fixed_image_layer_bbox = '{{ view.bbox }}';
+lizard_neerslagradar.fixed_start_dt = '{{ view.start_dt }}';
+
+lizard_neerslagradar.user_logged_in = {% if view.region_bbox %}true{% else %}false {% endif %};
+{% if view.user_logged_in %}
+lizard_neerslagradar.region_bbox = '{{ view.region_bbox }}';
+{% endif %}
 </script>
 <script type="text/javascript"
         src="{{ STATIC_URL }}lizard_neerslagradar/lizard_neerslagradar.js"></script>
