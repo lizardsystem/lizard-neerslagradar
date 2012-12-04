@@ -22,6 +22,8 @@ install_requires = [
     'pyproj',
     'GDAL',
     'pydap',
+    'factory_boy',
+    'mock'
     ],
 
 tests_require = [

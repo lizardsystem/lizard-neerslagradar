@@ -11,6 +11,8 @@ Changelog of lizard-neerslagradar
 - Now shows data from the correct grid pixel.
 - Show two animated layers when the user is logged in: whole region
   with low opacity, and the user's region with high opacity
+- Region.extent_for_user() now always returns an extent that
+  lines up with boundaries of the composite grid
 
 0.2 (2012-11-29)
 ----------------

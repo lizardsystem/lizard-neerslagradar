@@ -9,7 +9,6 @@ import mapnik
 
 import lizard_map.views
 from lizard_map.models import WorkspaceEdit
-from lizard_map import coordinates
 from lizard_ui.layout import Action
 from lizard_neerslagradar import netcdf
 from lizard_neerslagradar import models

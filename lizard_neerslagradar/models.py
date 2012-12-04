@@ -1,6 +1,7 @@
 #import datetime
 
 from lizard_map import coordinates
+from lizard_neerslagradar import projections
 
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
@@ -34,20 +35,43 @@ class Region(models.Model):
         if not regions:
             return None
 
-        google_extents = [region.google_extent() for region in regions]
+        wgs84extents = [region.geometry.extent for region in regions]
 
         extents = [{
                 'left': xmin,
                 'bottom': ymax,
                 'right': xmax,
                 'top': ymin
-                } for xmin, ymin, xmax, ymax in google_extents]
+                } for xmin, ymin, xmax, ymax in wgs84extents]
+
+        extent = {
+            'left': min(extent['left'] for extent in extents),
+            'bottom': max(extent['bottom'] for extent in extents),
+            'right': max(extent['right'] for extent in extents),
+            'top': min(extent['top'] for extent in extents)
+            }
+
+        # Now we want to translate the topleft and bottomright to grid cells,
+        # and use their topleft and bottomright as the _actual_ extent, so that
+        # it will contain whole grid cells.
+        topleft = projections.coordinate_to_composite_pixel(
+            extent['left'], extent['top'])
+        bottomright = (
+            projections.coordinate_to_composite_pixel(
+                extent['right'], extent['bottom']))
+
+        if topleft is None or bottomright is None:
+            return None
+
+        left, top = projections.topleft_of_composite_pixel(*topleft)
+        right, bottom = projections.bottomright_of_composite_pixel(
+            *bottomright)
 
         return {
-            'left': str(min(extent['left'] for extent in extents)),
-            'bottom': str(max(extent['bottom'] for extent in extents)),
-            'right': str(max(extent['right'] for extent in extents)),
-            'top': str(min(extent['top'] for extent in extents))
+            'left': str(left),
+            'bottom':  str(bottom),
+            'right': str(right),
+            'top': str(top)
             }
 
     @classmethod

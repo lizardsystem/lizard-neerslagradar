@@ -21,7 +21,7 @@ from lizard_map import coordinates
 from lizard_map import workspace
 from lizard_map.adapter import Graph, FlotGraph
 
-#from lizard_neerslagradar import projections
+from lizard_neerslagradar import projections
 from lizard_neerslagradar import models
 
 logger = logging.getLogger(__name__)
@@ -30,23 +30,6 @@ logger = logging.getLogger(__name__)
 DATASET_URL = 'http://gmdb.lizard.net/thredds/dodsC/radar/radar.nc'
 
 UTC_2000 = pytz.utc.localize(datetime.datetime(2000, 1, 1))
-
-
-def coordinate_to_composite_pixel(lon, lat):
-    rd_x, rd_y = coordinates.wgs84_to_rd(lon, lat)
-
-    minx, maxx, maxy, miny = settings.COMPOSITE_EXTENT
-    cellsize_x, cellsize_y = settings.COMPOSITE_CELLSIZE
-
-    cells_y = (maxy - miny) / cellsize_y
-
-    if not (minx <= rd_x <= maxx) or not (miny <= rd_y <= maxy):
-        return None
-
-    x = int((rd_x - minx) / cellsize_x)
-    y = int(cells_y - ((rd_y - miny) / cellsize_y))
-
-    return (x, y)
 
 
 def minutes_since_2000_to_utc(minutes_since_2000):
@@ -124,7 +107,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         lon, lat = coordinates.google_to_wgs84(google_x, google_y)
 
         region = models.Region.find_by_point((lon, lat))
-        pixel = coordinate_to_composite_pixel(lon, lat)
+        pixel = projections.coordinate_to_composite_pixel(lon, lat)
 
         if region is None or pixel is None:
             logger.debug("Region is None or pixel is None.")

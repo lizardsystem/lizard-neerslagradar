@@ -7,8 +7,8 @@ BUILDOUT_DIR = os.path.abspath(os.path.join(SETTINGS_DIR, '..'))
 
 LOGGING = setup_logging(BUILDOUT_DIR)
 
-DEBUG = True
-TEMPLATE_DEBUG = True
+DEBUG = False
+TEMPLATE_DEBUG = False
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.spatialite',
@@ -77,6 +77,12 @@ MAP_SHOW_DATE_RANGE = False
 
 GEOTIFF_DIR = os.path.join(BUILDOUT_DIR, 'var', 'geotiff')
 RADAR_NC_PATH = '/media/WORKSPACE/lizard-regenradar/radar.nc'
+
+# Gridproperties for resulting composite
+# from nens/radar config.py
+# left, right, top, bottom
+COMPOSITE_EXTENT = (-110000, 390000, 700000, 210000)
+COMPOSITE_CELLSIZE = (1000, 1000)
 
 try:
     # Import local settings that aren't stored in svn.

@@ -1,16 +1,11 @@
 import os
-#import contextlib
 import logging
-#import hashlib
-#import datetime
 
 from django.conf import settings
 
 from osgeo import osr
-#from PIL import Image
 import numpy as np
 import netCDF4
-#import dateutil
 import gdal
 import matplotlib
 from matplotlib import cm
