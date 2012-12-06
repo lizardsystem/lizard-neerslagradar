@@ -128,7 +128,7 @@ if (lizard_neerslagradar.user_logged_in) {
     lizard_neerslagradar.region_bbox.split(','));
 }
 
-for (var i=0; i<288; i+=3) {
+for (var i=0; i<288; i++) {
     if (lizard_neerslagradar.user_logged_in) {
         layers.push(new MyLayer(
             moment.utc(start_dt).add('minutes', 5 * i),
@@ -171,7 +171,9 @@ function set_layer (layer_idx) {
             layer.ol_layer.setCssVisibility(true);
             if (lizard_neerslagradar.user_logged_in) {
                 layer = regional_layers[layer_idx];
-                layer.ol_layer.setCssVisibility(true);
+                if (layer && layer.ol_layer) {
+                    layer.ol_layer.setCssVisibility(true);
+                }
             }
         }
 
@@ -184,12 +186,14 @@ function set_layer (layer_idx) {
 
 function cycle_layers () {
     var current_layer = layers[current_layer_idx];
+    var regional_layer;
     if (lizard_neerslagradar.user_logged_in) {
-        var regional_layer = regional_layers[current_layer_idx];
+        regional_layer = regional_layers[current_layer_idx];
     }
     // don't swap layers when we're still loading
-    if (!current_layer.ol_layer.loading &&
+    if ((!current_layer || !current_layer.ol_layer.loading) &&
         (!lizard_neerslagradar.user_logged_in ||
+         !regional_layer ||
          !regional_layer.ol_layer.loading)) {
         // figure out next layer
         var next_layer_idx = (current_layer_idx >= layers.length - 1) ? 0 : current_layer_idx + 1;

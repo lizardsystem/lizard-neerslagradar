@@ -9,6 +9,8 @@ long_description = '\n\n'.join([
     ])
 
 install_requires = [
+    'simplejson >= 2.3.0, <2.5.0',
+    'numpy',
     'Django',
     'django-extensions',
     'django-nose',
@@ -18,7 +20,7 @@ install_requires = [
     'Pillow',
     'pandas',
     'netCDF4',
-    'python-dateutil',
+    'python-dateutil >= 1.5, <2.0',
     'pyproj',
     'GDAL',
     'pydap',

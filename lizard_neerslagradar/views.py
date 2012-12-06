@@ -68,7 +68,7 @@ class DefaultView(NeerslagRadarView):
             '1000954.7013451669, 7223311.813260503')
 
     def user_logged_in(self):
-        return str(self.request.user.is_authenticated())
+        return self.request.user.is_authenticated()
 
     def region_bbox(self):
         extent = models.Region.extent_for_user(self.request.user)
