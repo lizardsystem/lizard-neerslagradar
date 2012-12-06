@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.3 (unreleased)
+0.3 (2012-12-06)
 ----------------
 
 - Got a rudimentary dummy graph to work.
