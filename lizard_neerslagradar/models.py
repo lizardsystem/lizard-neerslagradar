@@ -63,9 +63,10 @@ class Region(models.Model):
         if topleft is None or bottomright is None:
             return None
 
-        left, top = projections.topleft_of_composite_pixel(*topleft)
+        left, top = projections.topleft_of_composite_pixel(
+            *topleft, to_projection=coordinates.google_projection)
         right, bottom = projections.bottomright_of_composite_pixel(
-            *bottomright)
+            *bottomright, to_projection=coordinates.google_projection)
 
         return {
             'left': str(left),

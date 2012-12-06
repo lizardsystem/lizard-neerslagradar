@@ -24,7 +24,8 @@ def coordinate_to_composite_pixel(lon, lat):
     return (x, y)
 
 
-def topleft_of_composite_pixel(x, y):
+def topleft_of_composite_pixel(x, y, to_projection=coordinates.rd_projection):
+    """To_projection is e.g. coordinates.google_projection."""
     left, right, top, bottom = settings.COMPOSITE_EXTENT
     dx, dy = settings.COMPOSITE_CELLSIZE
 
@@ -38,10 +39,21 @@ def topleft_of_composite_pixel(x, y):
     if topleft_y - 1 < bottom:
         raise ValueError("y not in bounds")
 
-    return topleft_x, topleft_y
+    if to_projection is coordinates.rd_projection:
+        return topleft_x, topleft_y
+    return coordinates.transform(
+        coordinates.rd_projection, to_projection, topleft_x, topleft_y)
 
-def bottomright_of_composite_pixel(x, y):
+
+def bottomright_of_composite_pixel(
+    x, y, to_projection=coordinates.rd_projection):
     topleft_x, topleft_y = topleft_of_composite_pixel(x, y)
     dx, dy = settings.COMPOSITE_CELLSIZE
 
-    return topleft_x + dx, topleft_y - dy
+    bottomright_x, bottomright_y = topleft_x + dx, topleft_y - dy
+
+    if to_projection is coordinates.rd_projection:
+        return bottomright_x, bottomright_y
+    return coordinates.transform(
+        coordinates.rd_projection, to_projection,
+        bottomright_x, bottomright_y)

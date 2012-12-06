@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 DATASET_URL = 'http://gmdb.lizard.net/thredds/dodsC/radar/radar.nc'
+#DATASET_URL = 'http://gmdb.lizard.net/thredds/dodsC/radar/clutter.h5'
 
 UTC_2000 = pytz.utc.localize(datetime.datetime(2000, 1, 1))
 
