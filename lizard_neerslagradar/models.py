@@ -3,6 +3,7 @@
 from lizard_map import coordinates
 from lizard_neerslagradar import projections
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
@@ -60,8 +61,11 @@ class Region(models.Model):
             projections.coordinate_to_composite_pixel(
                 extent['right'], extent['bottom']))
 
-        if topleft is None or bottomright is None:
-            return None
+        if topleft is None:
+            topleft = (0, 0)
+        if bottomright is None:
+            cells_x, cells_y = settings.COMPOSITE_CELLS
+            bottomright = (cells_x - 1, cells_y - 1)
 
         left, top = projections.topleft_of_composite_pixel(
             *topleft, to_projection=coordinates.google_projection)

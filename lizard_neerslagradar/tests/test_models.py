@@ -1,10 +1,11 @@
 import factory
+import mock
 
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.models import User
-from django.contrib.gis.geos import GEOSGeometry
 from django.test import TestCase
 
+from lizard_map import coordinates
 from lizard_neerslagradar import models
 
 # Found by calling coordinates.rd_to_wgs84 on 150000 450000
@@ -29,7 +30,8 @@ class RegionF(factory.Factory):
 
 class TestRegion(TestCase):
     def test_has_unicode(self):
-        self.assertTrue(unicode(RegionF.build()))
+        self.assertTrue(
+            'naam' in unicode(RegionF.build(name='naam')))
 
     def test_google_extent_works(self):
         region = RegionF.build()
@@ -47,6 +49,31 @@ class TestRegion(TestCase):
         self.assertEquals(
             None,
             models.Region.extent_for_user(user))
+
+    @mock.patch(
+        'lizard_neerslagradar.projections.coordinate_to_composite_pixel',
+        return_value=None)
+    @mock.patch(
+        'lizard_neerslagradar.projections.topleft_of_composite_pixel',
+        return_value=(0, 0))
+    @mock.patch(
+        'lizard_neerslagradar.projections.bottomright_of_composite_pixel',
+        return_value=(0, 0))
+    def test_if_extent_outside_composite_uses_corners(
+        self, mocked_bottomright, mocked_topleft, mocked_to_composite):
+        user = UserF.create()
+        region = RegionF.create()
+        region.users.add(user)
+
+        with self.settings(COMPOSITE_CELLS=(500, 490)):
+            models.Region.extent_for_user(user)
+
+        # topleft and bottomright should have been called with topleft
+        # and bottomright pixels of the composite
+        mocked_topleft.assert_called_with(
+            0, 0, to_projection=coordinates.google_projection)
+        mocked_bottomright.assert_called_with(
+            499, 489, to_projection=coordinates.google_projection)
 
     def test_extent_returned(self):
         user = UserF.create()
