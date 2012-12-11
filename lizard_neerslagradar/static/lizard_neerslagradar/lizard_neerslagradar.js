@@ -124,12 +124,13 @@
     var full_bbox = new OpenLayers.Bounds(
         lizard_neerslagradar.fixed_image_layer_bbox.split(','));
 
+    var regional_bbox;
     if (lizard_neerslagradar.user_logged_in) {
-        var regional_bbox = new OpenLayers.Bounds(
+        regional_bbox = new OpenLayers.Bounds(
             lizard_neerslagradar.region_bbox.split(','));
     }
 
-    for (var i=0; i<288; i++) {
+    for (var i=0; i<36; i++) {
         if (lizard_neerslagradar.user_logged_in) {
             layers.push(new MyLayer(
                 moment.utc(start_dt).add('minutes', 5 * i),
@@ -206,8 +207,8 @@
         var init_layer = function (idx, layer) {
             var dt_iso_8601 = layer.dt.format('YYYY-MM-DDTHH:mm:ss') + '.000Z';
             var wms_params = {
-                WIDTH: 512,
-                HEIGHT: 512,
+                WIDTH: 500,
+                HEIGHT: 490,
                 SRS: 'EPSG:3857',
                 BBOX: layer.bbox.toBBOX(),
                 TIME: dt_iso_8601,
@@ -218,7 +219,7 @@
                 'L' + idx,
                 wms_url,
                 layer.bbox,
-                new OpenLayers.Size(512, 512),
+                new OpenLayers.Size(500, 490),
                 {
                     isBaseLayer: false,
                     alwaysInRange: true,

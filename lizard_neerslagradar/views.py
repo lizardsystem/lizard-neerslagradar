@@ -8,6 +8,7 @@ import dateutil
 import mapnik
 
 import lizard_map.views
+import lizard_map.coordinates
 from lizard_map.models import WorkspaceEdit
 from lizard_ui.layout import Action
 from lizard_neerslagradar import netcdf
@@ -64,8 +65,8 @@ class DefaultView(NeerslagRadarView):
 
     def bbox(self):
         return (
-            '148076.83040199202, 6416328.309563829, '
-            '1000954.7013451669, 7223311.813260503')
+            '189777.4474149466, 6415434.003328215, '
+            '1000886.5520892952, 7214122.396045159')
 
     def user_logged_in(self):
         return self.request.user.is_authenticated()
@@ -96,8 +97,8 @@ class WmsView(View):
 
         bbox = request.GET.get(
             'BBOX',
-            '151345.64262053, 6358643.0784661, '
-            '981757.51779509, 7136466.2781877')
+            '189777.4474149466, 6415434.003328215, '
+            '1000886.5520892952, 7214122.396045159')
         bbox = tuple([float(i.strip()) for i in bbox.split(',')])
         srs = request.GET.get('SRS', 'EPSG:3857')
 
@@ -119,16 +120,24 @@ class WmsView(View):
 
     def serve_geotiff(self, path, width, height, bbox, srs, opacity):
         # Create a map
+        minx_google, miny_google, maxx_google, maxy_google = bbox
+        (minx_rd, miny_rd) = lizard_map.coordinates.google_to_rd(
+            minx_google, miny_google)
+        (maxx_rd, maxy_rd) = lizard_map.coordinates.google_to_rd(
+            maxx_google, maxy_google)
+
+        bbox_rd = (minx_rd, miny_rd, maxx_rd, maxy_rd)
+
         mapnik_map = mapnik.Map(width, height)
 
         # Setup coordinate system and background
-        mapnik_map.srs = netcdf.GOOGLEMERCATOR.ExportToProj4()
+        mapnik_map.srs = lizard_map.coordinates.RD
         mapnik_map.background = mapnik.Color('transparent')
 
         # Create a layer from the geotiff
         raster = mapnik.Gdal(file=str(path), shared=True)
         layer = mapnik.Layer(
-            'Tiff Layer', netcdf.GOOGLEMERCATOR.ExportToProj4())
+            'Tiff Layer', lizard_map.coordinates.RD)
         layer.datasource = raster
         s = mapnik.Style()
         r = mapnik.Rule()
@@ -143,7 +152,7 @@ class WmsView(View):
         mapnik_map.append_style('geotiff', s)
 
         # Zoom to bbox and create the PNG image
-        mapnik_map.zoom_to_box(mapnik.Envelope(*bbox))
+        mapnik_map.zoom_to_box(mapnik.Envelope(*bbox_rd))
         img = mapnik.Image(width, height)
         mapnik.render(mapnik_map, img)
         img_data = img.tostring('png')
