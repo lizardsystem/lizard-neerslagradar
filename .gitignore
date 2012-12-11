@@ -9,6 +9,7 @@ develop-eggs/
 doc/build/
 htmlcov/
 parts/
+build/
 var/
 *.egg-info
 
