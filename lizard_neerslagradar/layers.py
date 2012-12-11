@@ -232,7 +232,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
                     dates, values,
                     lw=1,
                     color=line_styles[str(identifier)]['color'],
-                    label="Dummy")
+                    label=identifier.get('region_name', '?'))
         # Apply custom layout parameters.
         if 'layout' in identifier:
             layout = identifier['layout']
@@ -240,7 +240,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
                 graph.axes.set_ylabel(layout['y_label'])
             if "x_label" in layout:
                 graph.set_xlabel(layout['x_label'])
-            apply_lines(identifier, values, "Dummy")
+            apply_lines(identifier, values, identifier.get('region_name', '?'))
 
         if is_empty and raise_404_if_empty:
             raise Http404
