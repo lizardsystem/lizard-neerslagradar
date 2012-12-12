@@ -5,8 +5,12 @@ Changelog of lizard-neerslagradar
 0.6 (unreleased)
 ----------------
 
-- Nothing changed yet.
-
+- Uses gdalwarp / gdal_translate to make pngs for the animation
+- Caches these pngs, but _doesn't delete them yet_. Don't use in
+  production.
+- Images for whole country and regions still don't overlap exactly.
+- Added debug info to the mouseover (google, rd coordinates of
+  point). Don't use in production.
 
 0.5 (2012-12-12)
 ----------------

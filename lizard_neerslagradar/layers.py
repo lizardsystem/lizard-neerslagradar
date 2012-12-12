@@ -106,6 +106,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
 
     def search(self, google_x, google_y, radius=None):
         lon, lat = coordinates.google_to_wgs84(google_x, google_y)
+        rd_x, rd_y = coordinates.google_to_rd(google_x, google_y)
 
         region = models.Region.find_by_point((lon, lat))
         pixel = projections.coordinate_to_composite_pixel(lon, lat)
@@ -114,7 +115,10 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
             logger.debug("Region is None or pixel is None.")
             return []
 
-        name = '{0}, cel ({1} {2})'.format(region, *pixel)
+        name = (('{0}, cel ({1} {2}) (google {google_x} '
+                '{google_y}) (rd {rd_x} {rd_y})').
+                format(region, pixel[0], pixel[1], google_x=google_x,
+                       google_y=google_y, rd_x=rd_x, rd_y=rd_y))
 
         return [{
                 'distance': 0,

@@ -5,7 +5,6 @@ from django.views.generic.base import View
 from django.utils import simplejson as json
 
 import dateutil
-import mapnik
 
 import lizard_map.views
 import lizard_map.coordinates
@@ -13,6 +12,8 @@ from lizard_map.models import WorkspaceEdit
 from lizard_ui.layout import Action
 from lizard_neerslagradar import netcdf
 from lizard_neerslagradar import models
+from lizard_neerslagradar import reproject
+
 
 logger = logging.getLogger(__name__)
 
@@ -128,35 +129,11 @@ class WmsView(View):
 
     def serve_geotiff(self, path, width, height, bbox, srs, opacity):
         # Create a map
-        mapnik_map = mapnik.Map(width, height)
-
-        # Setup coordinate system and background
-        mapnik_map.srs = lizard_map.coordinates.GOOGLE
-        mapnik_map.background = mapnik.Color('transparent')
-
-        # Create a layer from the geotiff
-        raster = mapnik.Gdal(file=str(path), shared=True)
-        layer = mapnik.Layer(
-            'Tiff Layer', lizard_map.coordinates.GOOGLE)
-        layer.datasource = raster
-        s = mapnik.Style()
-        r = mapnik.Rule()
-        rs = mapnik.RasterSymbolizer()
-        rs.opacity = opacity
-        r.symbols.append(rs)
-        s.rules.append(r)
-        layer.styles.append('geotiff')
-
-        # Add the layer
-        mapnik_map.layers.append(layer)
-        mapnik_map.append_style('geotiff', s)
-
-        # Zoom to bbox and create the PNG image
-        mapnik_map.zoom_to_box(mapnik.Envelope(*bbox))
-        img = mapnik.Image(width, height)
-        mapnik.render(mapnik_map, img)
-        img_data = img.tostring('png')
+        png = reproject.reprojected_image(
+            geotiff_path=path, width=width, height=height, bbox=bbox,
+            srs=srs)
 
         # Return the HttpResponse
-        response = HttpResponse(img_data, content_type='image/png')
+        response = HttpResponse(
+            open(png, "rb").read(), content_type='image/png')
         return response

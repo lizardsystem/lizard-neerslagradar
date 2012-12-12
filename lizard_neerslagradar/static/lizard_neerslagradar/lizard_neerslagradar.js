@@ -211,8 +211,7 @@
                 HEIGHT: 497,
                 SRS: 'EPSG:3857',
                 BBOX: layer.bbox.toBBOX(),
-                TIME: dt_iso_8601,
-                OPACITY: layer.opacity
+                TIME: dt_iso_8601
             };
             var wms_url = lizard_neerslagradar.wms_base_url + '?' + $.param(wms_params);
             var ol_layer = new CssHideableImageLayer(
@@ -227,6 +226,7 @@
                     cssVisibility: false, // hide layer again with this custom option
                     displayInLayerSwitcher: false,
                     metadata: layer,
+                    opacity: layer.opacity,
                     eventListeners: {
                         'loadstart': function () {
                             layers_loading++;
