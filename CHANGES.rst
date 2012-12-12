@@ -5,7 +5,8 @@ Changelog of lizard-neerslagradar
 0.5 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- We now use Google-projected Geotiffs and the projection is slightly
+  better, but it's not the final solution yet.
 
 
 0.4 (2012-12-06)
