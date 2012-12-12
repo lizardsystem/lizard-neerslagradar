@@ -52,13 +52,13 @@ class TestRegion(TestCase):
 
     @mock.patch(
         'lizard_neerslagradar.projections.coordinate_to_composite_pixel',
-        return_value=None)
+        return_value=None)  # No coordinates found
     @mock.patch(
         'lizard_neerslagradar.projections.topleft_of_composite_pixel',
-        return_value=(0, 0))
+        return_value=(0, 0))  # Dummy return value
     @mock.patch(
         'lizard_neerslagradar.projections.bottomright_of_composite_pixel',
-        return_value=(0, 0))
+        return_value=(0, 0))  # Dummy return value
     def test_if_extent_outside_composite_uses_corners(
         self, mocked_bottomright, mocked_topleft, mocked_to_composite):
         user = UserF.create()

@@ -83,6 +83,7 @@ RADAR_NC_PATH = '/media/WORKSPACE/lizard-regenradar/radar.nc'
 # left, right, top, bottom
 COMPOSITE_EXTENT = (-110000, 390000, 700000, 210000)
 COMPOSITE_CELLSIZE = (1000, 1000)
+COMPOSITE_CELLS = (500, 490)
 
 try:
     # Import local settings that aren't stored in svn.

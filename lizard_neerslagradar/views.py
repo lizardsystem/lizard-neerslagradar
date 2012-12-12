@@ -19,6 +19,17 @@ logger = logging.getLogger(__name__)
 
 MAP_BASE_LAYER = 'map_base_layer'  # The selected base layer
 
+# We have GOOGLE geotiffs, created from the RD geotiffs with gdalwarp
+# A 500x490 RD tiff turns into a 525x497 Google tiff
+TIFF_DIMENSIONS = (525, 497)
+# And this is the bounding box that gdalinfo gives:
+TIFF_BBOX = ', '.join([
+    '147419.974',  # Left, minx
+    '6416139.595',  # Bottom, miny
+    '1001045.904',  # Right, maxx
+    '7224238.809'  # Top, maxy
+])
+
 
 class NeerslagRadarView(lizard_map.views.AppView):
     def start_extent(self):
@@ -64,9 +75,7 @@ class DefaultView(NeerslagRadarView):
         return super(DefaultView, self).dispatch(request, *args, **kwargs)
 
     def bbox(self):
-        return (
-            '189777.4474149466, 6415434.003328215, '
-            '1000886.5520892952, 7214122.396045159')
+        return TIFF_BBOX
 
     def user_logged_in(self):
         return self.request.user.is_authenticated()
@@ -96,9 +105,8 @@ class WmsView(View):
         opacity = float(request.GET.get('OPACITY', '0.6'))
 
         bbox = request.GET.get(
-            'BBOX',
-            '189777.4474149466, 6415434.003328215, '
-            '1000886.5520892952, 7214122.396045159')
+            'BBOX', TIFF_BBOX)
+
         bbox = tuple([float(i.strip()) for i in bbox.split(',')])
         srs = request.GET.get('SRS', 'EPSG:3857')
 
@@ -120,24 +128,16 @@ class WmsView(View):
 
     def serve_geotiff(self, path, width, height, bbox, srs, opacity):
         # Create a map
-        minx_google, miny_google, maxx_google, maxy_google = bbox
-        (minx_rd, miny_rd) = lizard_map.coordinates.google_to_rd(
-            minx_google, miny_google)
-        (maxx_rd, maxy_rd) = lizard_map.coordinates.google_to_rd(
-            maxx_google, maxy_google)
-
-        bbox_rd = (minx_rd, miny_rd, maxx_rd, maxy_rd)
-
         mapnik_map = mapnik.Map(width, height)
 
         # Setup coordinate system and background
-        mapnik_map.srs = lizard_map.coordinates.RD
+        mapnik_map.srs = lizard_map.coordinates.GOOGLE
         mapnik_map.background = mapnik.Color('transparent')
 
         # Create a layer from the geotiff
         raster = mapnik.Gdal(file=str(path), shared=True)
         layer = mapnik.Layer(
-            'Tiff Layer', lizard_map.coordinates.RD)
+            'Tiff Layer', lizard_map.coordinates.GOOGLE)
         layer.datasource = raster
         s = mapnik.Style()
         r = mapnik.Rule()
@@ -152,7 +152,7 @@ class WmsView(View):
         mapnik_map.append_style('geotiff', s)
 
         # Zoom to bbox and create the PNG image
-        mapnik_map.zoom_to_box(mapnik.Envelope(*bbox_rd))
+        mapnik_map.zoom_to_box(mapnik.Envelope(*bbox))
         img = mapnik.Image(width, height)
         mapnik.render(mapnik_map, img)
         img_data = img.tostring('png')

@@ -1,6 +1,10 @@
+import logging
+
 from django.conf import settings
 
 from lizard_map import coordinates
+
+logger = logging.getLogger(__name__)
 
 
 def coordinate_to_composite_pixel(lon, lat):
@@ -29,15 +33,18 @@ def topleft_of_composite_pixel(x, y, to_projection=coordinates.rd_projection):
     left, right, top, bottom = settings.COMPOSITE_EXTENT
     dx, dy = settings.COMPOSITE_CELLSIZE
 
-    dy = -dy  # Because top > bottom
+    cells_x, cells_y = settings.COMPOSITE_CELLS
+
+    if x < 0 or x >= cells_x:
+        raise ValueError("x not in bounds")
+
+    if y < 0 or y >= cells_y:
+        raise ValueError("y not in bounds")
+
+    dy = -dy  # Because top > bottom in RD
 
     topleft_x = left + x * dx
     topleft_y = top + y * dy
-
-    if topleft_x > right - 1:
-        raise ValueError("x not in bounds")
-    if topleft_y - 1 < bottom:
-        raise ValueError("y not in bounds")
 
     if to_projection is coordinates.rd_projection:
         return topleft_x, topleft_y
