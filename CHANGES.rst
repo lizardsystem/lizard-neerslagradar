@@ -12,6 +12,8 @@ Changelog of lizard-neerslagradar
 - Added debug info to the mouseover (google, rd coordinates of
   point). Don't use in production.
 - Add lizard_rainapp's herhalingstijden calculations to the popup
+- CSV download works now
+
 
 0.5 (2012-12-12)
 ----------------

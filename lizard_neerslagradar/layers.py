@@ -301,6 +301,19 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         graph.add_today()
         return graph.render()
 
+    def values(self, identifier, start_date, end_date):
+        # Convert start and end dates to utc.
+        start_date_utc = to_utc(start_date)
+        end_date_utc = to_utc(end_date)
+
+        timeseries = get_timeseries(
+            start_date_utc, end_date_utc, identifier)
+
+        return [{
+                'datetime': k,
+                'value': v,
+                'unit': 'mm/5min'} for (k, v) in timeseries.iter_items()]
+
     def html(self, identifiers=None, layout_options=None):
         """
         Popup with graph - table - bargraph.
@@ -318,7 +331,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
 
         # Convert start and end dates to utc.
         start_date_utc = to_utc(start_date)
-        end_date_utc = (end_date)
+        end_date_utc = to_utc(end_date)
 
         td_windows = [datetime.timedelta(days=2),
                       datetime.timedelta(days=1),
@@ -336,13 +349,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
             flot_graph_data_url = self.workspace_mixin_item.url(
                 "lizard_map_adapter_flot_graph_data", (identifier,))
 
-            timeseries = get_timeseries(
-                start_date_utc, end_date_utc, identifier)
-            values = [{
-                    'datetime': k,
-                    'value': v} for (k, v) in timeseries.iter_items()]
-
-            values[0]['unit'] = 'mm/5min'
+            values = self.values(identifier, start_date_utc, end_date_utc)
 
             area_km2 = 1.0  # A defining feature of the Neerslagradar
                             # is that we always work in a 1km x 1km
