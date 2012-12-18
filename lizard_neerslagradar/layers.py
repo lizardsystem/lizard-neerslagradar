@@ -166,6 +166,12 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
             'identifier': identifier,
             }
 
+    def image(self, identifiers=None, start_date=None, end_date=None,
+              width=None, height=None, layout_extra=None):
+        return self._render_graph(
+            identifiers, start_date, end_date, layout_extra=layout_extra,
+            GraphClass=FlotGraph)
+
     def flot_graph_data(
         self, identifiers, start_date, end_date, layout_extra=None,
         raise_404_if_empty=False
@@ -247,11 +253,13 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
             dates = timeseries.dates()
             values = timeseries.values()
 
+            bar_width = (graph.get_bar_width(datetime.timedelta(minutes=5))
+                         if hasattr(graph, 'get_bar_width') else 1)
             if values:
                 graph.axes.bar(
                     dates,
                     values,
-                    width=graph.get_bar_width(datetime.timedelta(minutes=5)),
+                    width=bar_width,
                     edgecolor=line_styles[str(identifier)]['color'],
                     label=identifier.get('region_name', '?'))
         # Apply custom layout parameters.
