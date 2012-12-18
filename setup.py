@@ -16,6 +16,7 @@ install_requires = [
     'django-nose',
     'lizard-ui >= 4.12',
     'lizard-map >= 4.10',
+    'lizard-rainapp >= 1.9',  # We use this for the herhalingstijden code
     'numpy',
     'Pillow',
     'pandas',

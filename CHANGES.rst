@@ -11,6 +11,7 @@ Changelog of lizard-neerslagradar
 - Images for whole country and regions still don't overlap exactly.
 - Added debug info to the mouseover (google, rd coordinates of
   point). Don't use in production.
+- Add lizard_rainapp's herhalingstijden calculations to the popup
 
 0.5 (2012-12-12)
 ----------------

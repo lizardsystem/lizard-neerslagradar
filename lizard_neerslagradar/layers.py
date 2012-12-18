@@ -16,10 +16,16 @@ import pytz
 
 from django.conf import settings
 from django.http import Http404
+from django.template.loader import render_to_string
+from django.utils import simplejson as json
 
 from lizard_map import coordinates
 from lizard_map import workspace
 from lizard_map.adapter import Graph, FlotGraph
+from lizard_map.daterange import current_start_end_dates
+
+from lizard_rainapp.calculations import t_to_string
+from lizard_rainapp.calculations import rain_stats
 
 from lizard_neerslagradar import projections
 from lizard_neerslagradar import models
@@ -28,9 +34,9 @@ logger = logging.getLogger(__name__)
 
 
 DATASET_URL = 'http://gmdb.lizard.net/thredds/dodsC/radar/radar.nc'
-#DATASET_URL = 'http://gmdb.lizard.net/thredds/dodsC/radar/clutter.h5'
 
-UTC_2000 = pytz.utc.localize(datetime.datetime(2000, 1, 1))
+UTC = pytz.utc
+UTC_2000 = UTC.localize(datetime.datetime(2000, 1, 1))
 
 
 def minutes_since_2000_to_utc(minutes_since_2000):
@@ -39,6 +45,16 @@ def minutes_since_2000_to_utc(minutes_since_2000):
 
 def utc_to_minutes_since_2000(utc_datetime):
     return int((utc_datetime - UTC_2000).total_seconds() / 60)
+
+
+def to_utc(datetime_object):
+    """If datetime is naive, assume it is UTC and turn it into a UTC
+    date. If it has an associated timezone, translate to UTC."""
+
+    if datetime_object.utcoffset() is None:
+        return UTC.localize(datetime_object)
+    else:
+        return datetime_object.astimezone(UTC)
 
 
 class Timeseries(object):
@@ -76,6 +92,9 @@ class Timeseries(object):
     def values(self):
         return list(self.timeseries)
 
+    def iter_items(self):
+        return ((k, self.timeseries[k]) for k in self.timeseries.keys())
+
 
 def get_timeseries(start_date, end_date, identifier):
     pixel_x, pixel_y = identifier['identifier']
@@ -104,6 +123,11 @@ def get_timeseries(start_date, end_date, identifier):
 class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
     """Registered as adapter_neerslagradar"""
 
+    def _grid_name(self, region_name, pixel):
+        """Returns name as a utf8-encoded byte string."""
+        return (u'{0}, cel ({1} {2})'
+                .format(region_name, *pixel).encode('utf8'))
+
     def search(self, google_x, google_y, radius=None):
         lon, lat = coordinates.google_to_wgs84(google_x, google_y)
         rd_x, rd_y = coordinates.google_to_rd(google_x, google_y)
@@ -115,10 +139,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
             logger.debug("Region is None or pixel is None.")
             return []
 
-        name = (('{0}, cel ({1} {2}) (google {google_x} '
-                '{google_y}) (rd {rd_x} {rd_y})').
-                format(region, pixel[0], pixel[1], google_x=google_x,
-                       google_y=google_y, rd_x=rd_x, rd_y=rd_y))
+        name = self._grid_name(region.name, pixel)
 
         return [{
                 'distance': 0,
@@ -137,13 +158,8 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         """We have no layers."""
         return [], {}
 
-    def html(self, identifiers=None, layout_options=None):
-        return self.html_default(
-            identifiers=identifiers,
-            layout_options=layout_options)
-
     def location(self, identifier, region_name, layout=None):
-        name = '{0}, cel ({1} {2})'.format(region_name, *identifier)
+        name = self._grid_name(region_name, identifier)
 
         return {
             'name': name,
@@ -284,3 +300,93 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
 
         graph.add_today()
         return graph.render()
+
+    def html(self, identifiers=None, layout_options=None):
+        """
+        Popup with graph - table - bargraph.
+
+        We're using the template of RainApp's popup, so this function was
+        written to result in exactly the same context variables as RainApp's
+        adapter results in.
+        """
+        add_snippet = layout_options.get('add_snippet', False)
+
+        # Make table with given identifiers.
+        # Layer options contain request - not the best way but it works.
+        start_date, end_date = current_start_end_dates(
+            layout_options['request'])
+
+        # Convert start and end dates to utc.
+        start_date_utc = to_utc(start_date)
+        end_date_utc = (end_date)
+
+        td_windows = [datetime.timedelta(days=2),
+                      datetime.timedelta(days=1),
+                      datetime.timedelta(hours=3),
+                      datetime.timedelta(hours=1)]
+
+        info = []
+
+        symbol_url = self.symbol_url()
+
+        for identifier in identifiers:
+            logger.debug("IN HTML, identifier = {0}".format(identifier))
+            image_graph_url = self.workspace_mixin_item.url(
+                "lizard_map_adapter_image", (identifier,))
+            flot_graph_data_url = self.workspace_mixin_item.url(
+                "lizard_map_adapter_flot_graph_data", (identifier,))
+
+            timeseries = get_timeseries(
+                start_date_utc, end_date_utc, identifier)
+            values = [{
+                    'datetime': k,
+                    'value': v} for (k, v) in timeseries.iter_items()]
+
+            values[0]['unit'] = 'mm/5min'
+
+            area_km2 = 1.0  # A defining feature of the Neerslagradar
+                            # is that we always work in a 1km x 1km
+                            # grid.
+
+            period_summary_row = {
+                'max': sum(v['value'] for v in values),
+                'start': start_date,
+                'end': end_date,
+                'delta': (end_date - start_date).days,
+                't': t_to_string(None),
+            }
+            infoname = self._grid_name(
+                identifier['region_name'], identifier['identifier'])
+
+            info.append({
+                'identifier': identifier,
+                'identifier_json': json.dumps(identifier).replace('"', '%22'),
+                'shortname': infoname,
+                'name': infoname,
+                'location': infoname,
+                'period_summary_row': period_summary_row,
+                'table': [rain_stats(values,
+                                     area_km2,
+                                     td_window,
+                                     start_date_utc,
+                                     end_date_utc)
+                          for td_window in td_windows],
+                'image_graph_url': image_graph_url,
+                'flot_graph_data_url': flot_graph_data_url,
+                'url': self.workspace_mixin_item.url(
+                        "lizard_map_adapter_values", [identifier, ],
+                        extra_kwargs={'output_type': 'csv'}),
+                'workspace_item': self.workspace_mixin_item,
+                'adapter': self
+            })
+
+        return render_to_string(
+            'lizard_rainapp/popup_rainapp.html',
+            {
+                'title': infoname,
+                'symbol_url': symbol_url,
+                'add_snippet': add_snippet,
+                'workspace_item': self.workspace_item,
+                'info': info
+            }
+        )
