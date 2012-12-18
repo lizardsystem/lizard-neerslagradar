@@ -248,10 +248,11 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
             values = timeseries.values()
 
             if values:
-                graph.axes.plot(
-                    dates, values,
-                    lw=1,
-                    color=line_styles[str(identifier)]['color'],
+                graph.axes.bar(
+                    dates,
+                    values,
+                    width=graph.get_bar_width(datetime.timedelta(minutes=5)),
+                    edgecolor=line_styles[str(identifier)]['color'],
                     label=identifier.get('region_name', '?'))
         # Apply custom layout parameters.
         if 'layout' in identifier:

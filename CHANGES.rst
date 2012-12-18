@@ -13,7 +13,7 @@ Changelog of lizard-neerslagradar
   point). Don't use in production.
 - Add lizard_rainapp's herhalingstijden calculations to the popup
 - CSV download works now
-
+- Flot graphs are now bars
 
 0.5 (2012-12-12)
 ----------------
