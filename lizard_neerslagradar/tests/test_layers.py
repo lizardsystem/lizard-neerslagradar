@@ -15,5 +15,3 @@ class TestMinutesSince2000ToUtc(TestCase):
         self.assertEquals(utc.day, 2)
         self.assertEquals(utc.hour, 0)
         self.assertEquals(utc.minute, 0)
-
-

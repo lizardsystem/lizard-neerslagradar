@@ -15,7 +15,7 @@ from pydap import client
 import pytz
 
 from django.conf import settings
-from django.http import Http404
+from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils import simplejson as json
 
@@ -26,6 +26,9 @@ from lizard_map.daterange import current_start_end_dates
 
 from lizard_rainapp.calculations import t_to_string
 from lizard_rainapp.calculations import rain_stats
+from lizard_rainapp.calculations import UNIT_TO_TIMEDELTA
+
+from nens_graph.rainapp import RainappGraph
 
 from lizard_neerslagradar import projections
 from lizard_neerslagradar import models
@@ -170,7 +173,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
               width=None, height=None, layout_extra=None):
         return self._render_graph(
             identifiers, start_date, end_date, layout_extra=layout_extra,
-            GraphClass=FlotGraph)
+            GraphClass=RainappGraph)
 
     def flot_graph_data(
         self, identifiers, start_date, end_date, layout_extra=None,
@@ -193,121 +196,61 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         support FlotGraph.
         """
 
-        logger.debug("_RENDER_GRAPH entered")
-        logger.debug("identifiers: {0}".format(identifiers))
+        tz = pytz.timezone(settings.TIME_ZONE)
+        today_site_tz = tz.localize(datetime.datetime.now())
 
-        def apply_lines(identifier, values, location_name):
-            """Adds lines that are defined in layout. Uses function
-            variable graph, line_styles.
+        start_date_utc = to_utc(start_date)
+        end_date_utc = to_utc(end_date)
 
-            Inspired by fewsunblobbed"""
+        graph = GraphClass(start_date_utc,
+                           end_date_utc,
+                           today=today_site_tz,
+                           tz=tz,
+                           **extra_params)
 
-            layout = identifier['layout']
+        # Gets timeseries, draws the bars, sets  the legend
+        for identifier in identifiers:
+            location_name = self._grid_name(
+                identifier['region_name'], identifier['identifier'])
 
-            if "line_min" in layout:
-                graph.axes.axhline(
-                    min(values),
-                    color=line_styles[str(identifier)]['color'],
-                    lw=line_styles[str(identifier)]['min_linewidth'],
-                    ls=line_styles[str(identifier)]['min_linestyle'],
-                    label='Minimum %s' % location_name)
-            if "line_max" in layout:
-                graph.axes.axhline(
-                    max(values),
-                    color=line_styles[str(identifier)]['color'],
-                    lw=line_styles[str(identifier)]['max_linewidth'],
-                    ls=line_styles[str(identifier)]['max_linestyle'],
-                    label='Maximum %s' % location_name)
-            if "line_avg" in layout and values:
-                average = sum(values) / len(values)
-                graph.axes.axhline(
-                    average,
-                    color=line_styles[str(identifier)]['color'],
-                    lw=line_styles[str(identifier)]['avg_linewidth'],
-                    ls=line_styles[str(identifier)]['avg_linestyle'],
-                    label='Gemiddelde %s' % location_name)
+            cached_value_result = self.values(identifier,
+                                              start_date_utc,
+                                              end_date_utc)
 
-        logger.debug("Voor line_styles")
-        line_styles = self.line_styles(identifiers)
-        logger.debug("Na line_styles")
+            dates_site_tz = [row['datetime'].astimezone(tz)
+                         for row in cached_value_result]
 
-        today = datetime.datetime.now()
-        graph = GraphClass(start_date, end_date, today=today,
-                      tz=pytz.timezone(settings.TIME_ZONE), **extra_params)
-        graph.axes.grid(True)
+            values = [row['value'] for row in cached_value_result]
+            units = [row['unit'] for row in cached_value_result]
 
-        # Draw extra's (from fewsunblobbed)
-        title = None
-        y_min, y_max = None, None
-
-        is_empty = True
-
-        identifier = identifiers[0]
-        timeseries = get_timeseries(start_date, end_date, identifier)
-
-        logger.debug("Voor check of timeseries None is")
-
-        if timeseries is not None:
-            is_empty = False
-            # Plot data if available.
-            dates = timeseries.dates()
-            values = timeseries.values()
-
-            bar_width = (graph.get_bar_width(datetime.timedelta(minutes=5))
-                         if hasattr(graph, 'get_bar_width') else 1)
+            unit = ''
+            if len(units) > 0:
+                unit = units[0]
             if values:
-                graph.axes.bar(
-                    dates,
-                    values,
-                    width=bar_width,
-                    edgecolor=line_styles[str(identifier)]['color'],
-                    label=identifier.get('region_name', '?'))
-        # Apply custom layout parameters.
-        if 'layout' in identifier:
-            layout = identifier['layout']
-            if "y_label" in layout:
-                graph.axes.set_ylabel(layout['y_label'])
-            if "x_label" in layout:
-                graph.set_xlabel(layout['x_label'])
-            apply_lines(identifier, values, identifier.get('region_name', '?'))
+                unit_timedelta = UNIT_TO_TIMEDELTA.get(unit, None)
+                if unit_timedelta:
+                    # We can draw bars corresponding to period
+                    bar_width = graph.get_bar_width(unit_timedelta)
+                    offset = -1 * unit_timedelta
+                    offset_dates = [d + offset for d in dates_site_tz]
+                else:
+                    # We can only draw spikes.
+                    bar_width = 0
+                    offset_dates = dates_site_tz
+                graph.axes.bar(offset_dates,
+                               values,
+                               edgecolor='blue',
+                               width=bar_width,
+                               label=location_name)
+            graph.set_ylabel(unit)
+            # graph.legend()
+            graph.suptitle(location_name)
 
-        if is_empty and raise_404_if_empty:
-            raise Http404
+            # Use first identifier and breaks the loop
+            break
 
-        graph.legend()
+        graph.responseobject = HttpResponse(content_type='image/png')
 
-        # If there is data, don't draw a frame around the legend
-        if graph.axes.legend_ is not None:
-            graph.axes.legend_.draw_frame(False)
-        else:
-            # TODO: If there isn't, draw a message. Give a hint that
-            # using another time period might help.
-            pass
-
-        # Extra layout parameters. From lizard-fewsunblobbed.
-        y_min_manual = y_min is not None
-        y_max_manual = y_max is not None
-        if y_min is None:
-            y_min, _ = graph.axes.get_ylim()
-        if y_max is None:
-            _, y_max = graph.axes.get_ylim()
-
-        if title:
-            graph.suptitle(title)
-
-        graph.set_ylim(y_min, y_max, y_min_manual, y_max_manual)
-
-        # Copied from lizard-fewsunblobbed.
-        if "horizontal_lines" in layout_extra:
-            for horizontal_line in layout_extra['horizontal_lines']:
-                graph.axes.axhline(
-                    horizontal_line['value'],
-                    ls=horizontal_line['style']['linestyle'],
-                    color=horizontal_line['style']['color'],
-                    lw=horizontal_line['style']['linewidth'],
-                    label=horizontal_line['name'])
-
-        graph.add_today()
         return graph.render()
 
     def values(self, identifier, start_date, end_date):
@@ -318,10 +261,13 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         timeseries = get_timeseries(
             start_date_utc, end_date_utc, identifier)
 
-        return [{
-                'datetime': k,
-                'value': v,
-                'unit': 'mm/5min'} for (k, v) in timeseries.iter_items()]
+        if timeseries:
+            return [{
+                    'datetime': k,
+                    'value': v,
+                    'unit': 'mm/5min'} for (k, v) in timeseries.iter_items()]
+        else:
+            return []
 
     def html(self, identifiers=None, layout_options=None):
         """

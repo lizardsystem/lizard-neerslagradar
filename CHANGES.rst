@@ -14,6 +14,7 @@ Changelog of lizard-neerslagradar
 - Add lizard_rainapp's herhalingstijden calculations to the popup
 - CSV download works now
 - Flot graphs are now bars
+- Matplotlib graphs work and are bars (using RainApp graph)
 
 0.5 (2012-12-12)
 ----------------
