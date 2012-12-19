@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.6 (unreleased)
+0.6 (2012-12-19)
 ----------------
 
 - Uses gdalwarp / gdal_translate to make pngs for the animation
