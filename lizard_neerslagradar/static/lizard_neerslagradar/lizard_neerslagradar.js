@@ -1,6 +1,6 @@
 // jslint configuration; btw: don't put a space before 'jslint' below.
 /*jslint browser: true */
-/*global $, OpenLayers, window, map */
+/*global $, OpenLayers, window, map, lizard_neerslagradar */
 
 (function () {
     function MyLayer (dt, opacity, bbox) {
@@ -14,15 +14,22 @@
         cssVisibility: true,
 
         initialize: function (name, url, params, options) {
-            OpenLayers.Layer.WMS.prototype.initialize.apply(this, [name, url, params, options]);
+            OpenLayers.Layer.WMS.prototype.initialize.apply(
+                this, [name, url, params, options]);
             if (options.cssVisibility === true || options.cssVisibility === false) {
                 this.cssVisibility = options.cssVisibility;
             }
-            this.events.on({'added': this.updateCssVisibility, 'moveend': this.updateCssVisibility, scope: this});
+            this.events.on({
+                'added': this.updateCssVisibility,
+                'moveend': this.updateCssVisibility,
+                scope: this});
         },
 
         destroy: function () {
-            this.events.un({'added': this.updateCssVisibility, 'moveend': this.updateCssVisibility, scope: this});
+            this.events.un({
+                'added': this.updateCssVisibility,
+                'moveend': this.updateCssVisibility,
+                scope: this});
             OpenLayers.Layer.WMS.prototype.destroy.apply(this);
         },
 
@@ -47,15 +54,22 @@
         cssVisibility: true,
 
         initialize: function (name, url, extent, size, options) {
-            OpenLayers.Layer.Image.prototype.initialize.apply(this, [name, url, extent, size, options]);
+            OpenLayers.Layer.Image.prototype.initialize.apply(
+                this, [name, url, extent, size, options]);
             if (options.cssVisibility === true || options.cssVisibility === false) {
                 this.cssVisibility = options.cssVisibility;
             }
-            this.events.on({'added': this.updateCssVisibility, 'moveend': this.updateCssVisibility, scope: this});
+            this.events.on({
+                'added': this.updateCssVisibility,
+                'moveend': this.updateCssVisibility,
+                scope: this});
         },
 
         destroy: function () {
-            this.events.un({'added': this.updateCssVisibility, 'moveend': this.updateCssVisibility, scope: this});
+            this.events.un({
+                'added': this.updateCssVisibility,
+                'moveend': this.updateCssVisibility,
+                scope: this});
             OpenLayers.Layer.Image.prototype.destroy.apply(this);
         },
 
@@ -90,10 +104,10 @@
             var mapRes = this.map.getResolution();
             var targetRes = this.ovmap.getResolution();
             var resRatio = targetRes / mapRes;
-            if(resRatio > this.maxRatio) {
+            if (resRatio > this.maxRatio) {
                 // zoom in overview map
                 targetRes = this.minRatio * mapRes;
-            } else if(resRatio <= this.minRatio) {
+            } else if (resRatio <= this.minRatio) {
                 // zoom out overview map
                 targetRes = this.maxRatio * mapRes;
             }
@@ -130,24 +144,15 @@
             lizard_neerslagradar.region_bbox.split(','));
     }
 
-    for (var i=0; i<288; i++) {
+    for (var i=0; i < lizard_neerslagradar.animation_datetimes.length; i++) {
+        var dt = moment.utc(lizard_neerslagradar.animation_datetimes[i].datetime);
+        console.log("Dt = "+lizard_neerslagradar.animation_datetimes[i].datetime);
+
         if (lizard_neerslagradar.user_logged_in) {
-            layers.push(new MyLayer(
-                moment.utc(start_dt).add('minutes', 5 * i),
-                0.2,
-                full_bbox
-            ));
-            regional_layers.push(new MyLayer(
-                moment.utc(start_dt).add('minutes', 5 * i),
-                0.6,
-                regional_bbox
-            ));
+            layers.push(new MyLayer(dt, 0.2, full_bbox));
+            regional_layers.push(new MyLayer(dt, 0.6, regional_bbox));
         } else {
-            layers.push(new MyLayer(
-                moment.utc(start_dt).add('minutes', 5 * i),
-                0.6,
-                full_bbox
-            ));
+            layers.push(new MyLayer(dt, 0.6, full_bbox));
         }
     }
 
