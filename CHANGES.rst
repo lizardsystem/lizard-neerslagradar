@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.7 (unreleased)
+0.7 (2013-01-03)
 ----------------
 
 Adds a command 'create_reprojected_geotiffs'.
