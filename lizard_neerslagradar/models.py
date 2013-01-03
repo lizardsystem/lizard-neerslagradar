@@ -40,16 +40,16 @@ class Region(models.Model):
 
         extents = [{
                 'left': xmin,
-                'bottom': ymax,
+                'bottom': ymin,
                 'right': xmax,
-                'top': ymin
+                'top': ymax
                 } for xmin, ymin, xmax, ymax in wgs84extents]
 
         extent = {
             'left': min(extent['left'] for extent in extents),
-            'bottom': max(extent['bottom'] for extent in extents),
+            'bottom': min(extent['bottom'] for extent in extents),
             'right': max(extent['right'] for extent in extents),
-            'top': min(extent['top'] for extent in extents)
+            'top': max(extent['top'] for extent in extents)
             }
 
         # Now we want to translate the topleft and bottomright to grid cells,

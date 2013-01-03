@@ -5,7 +5,16 @@ Changelog of lizard-neerslagradar
 0.7 (unreleased)
 ----------------
 
-- Nothing changed yet.
+Adds a command 'create_reprojected_geotiffs'.
+
+The tiffs are for the whole area, and for each user. Tiffs are created
+based on the last 24 hours of production RD geotiffs. Older generated tiffs
+are cleaned up by the script.
+
+A setting GEOTIFF_ANIMATION_CACHE_DIR is needed to point to the directory
+in which these tiffs should be generated.
+
+The WmsView uses these tiffs to render Google projected image layers.
 
 
 0.6 (2012-12-19)

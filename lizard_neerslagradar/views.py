@@ -1,10 +1,14 @@
+import datetime
 import logging
+import pytz
 
 from django.http import HttpResponse
+from django.http import HttpResponseNotFound
 from django.views.generic.base import View
 from django.utils import simplejson as json
 
 import dateutil
+import os
 
 import lizard_map.views
 import lizard_map.coordinates
@@ -30,6 +34,12 @@ TIFF_BBOX = ', '.join([
     '1001045.904',  # Right, maxx
     '7224238.809'  # Top, maxy
 ])
+
+ANIMATION_STEP = 5  # Minutes
+
+
+def utc_now():
+    return pytz.UTC.localize(datetime.datetime.utcnow())
 
 
 class NeerslagRadarView(lizard_map.views.AppView):
@@ -61,6 +71,36 @@ def map_location_load_default(request):
     return lizard_map.views.map_location_load_default(request)
 
 
+def start_dt_string():
+    now = datetime.datetime.today()
+    yesterday = now - datetime.timedelta(hours=24)
+    minutes = (yesterday.minute // ANIMATION_STEP) * ANIMATION_STEP  # Rounded
+    return yesterday.strftime("%Y-%m-%dT%H:{0}:00.000Z").format(minutes)
+
+
+def animation_datetimes(today):
+    """Generator that yields all datetimes corresponding to animation
+    steps in the 24 hours before 'today'."""
+
+    yesterday = today - datetime.timedelta(hours=24)
+    step = datetime.timedelta(minutes=ANIMATION_STEP)
+
+    # Round the minutes
+    current = datetime.datetime(
+        year=yesterday.year,
+        month=yesterday.month,
+        day=yesterday.day,
+        hour=yesterday.hour,
+        minute=(yesterday.minute // ANIMATION_STEP) * ANIMATION_STEP,
+        tzinfo=yesterday.tzinfo)
+
+    while current < today:
+        if current >= yesterday:
+            """Rounding may have put 'current' before the 24-hour boundary"""
+            yield current
+        current = current + step
+
+
 class DefaultView(NeerslagRadarView):
     template_name = 'lizard_neerslagradar/wms_neerslagradar.html'
 
@@ -85,13 +125,37 @@ class DefaultView(NeerslagRadarView):
         extent = models.Region.extent_for_user(self.request.user)
         if extent:
             logger.debug(str(extent))
-            bbox = ', '.join((extent['left'], extent['top'],
-                              extent['right'], extent['bottom']))
+            bbox = ', '.join((extent['left'], extent['bottom'],
+                              extent['right'], extent['top']))
             logger.debug("BBOX: {0}".format(bbox))
             return bbox
 
+    def animation_datetimes(self):
+        """For every date/time in the last 24 hours, we check if the
+        data is available.  We need at least the "full" geotiff, and
+        if the user is logged in, then possibly a geotiff for the
+        user's region as well.
+
+        Returned JSON is set as a variable in Javascript
+        (wms_neerslagradar.html), and used in lizard_neerslagradar.js
+        to load the whole animation."""
+
+        data = []
+        for dt in animation_datetimes(utc_now()):
+            p = netcdf.time_2_path(dt)
+            p = reproject.cache_path(
+                p, 'EPSG:3857', TIFF_BBOX.split(", "), 525, 497)
+            logger.debug("Checking path: {0}".format(p))
+            if os.path.exists(p):
+                data.append({
+                        'datetime': dt.strftime("%Y-%m-%dT%H:%M:00.000Z"),
+                        })
+        logger.debug("Data: {0}".format(data))
+
+        return json.dumps(data)
+
     def start_dt(self):
-        return '2011-01-07T00:00:00.000Z'
+        return start_dt_string()
 
     @property
     def breadcrumbs(self):
@@ -113,25 +177,29 @@ class WmsView(View):
 
         # Either a time span, or a single time can be passed
         times = request.GET.get(
-            'TIME', '2011-01-07T00:00:00.000Z/2011-01-08T00:00:00.000Z')
+            'TIME', '')
         times = times.split('/')
-        if len(times) == 1:
+        if len(times) == 1 and times[0]:
             time_from = dateutil.parser.parse(times[0])
-#            time_to = None
         elif len(times) == 2:
             time_from = dateutil.parser.parse(times[0])
-#            time_to = dateutil.parser.parse(times[1])
         else:
             raise Exception('No time provided')
 
         path = netcdf.time_2_path(time_from)
+
         return self.serve_geotiff(path, width, height, bbox, srs, opacity)
 
     def serve_geotiff(self, path, width, height, bbox, srs, opacity):
         # Create a map
         png = reproject.reprojected_image(
             geotiff_path=path, width=width, height=height, bbox=bbox,
-            srs=srs)
+            srs=srs, create=False)
+
+        if png is None:
+            # It didn't exist -- return 404.
+            raise HttpResponseNotFound(
+                "Geotiff corresponding to WMS request not found.")
 
         # Return the HttpResponse
         response = HttpResponse(

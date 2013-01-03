@@ -1,14 +1,18 @@
 """Functions that reproject a RD geotiff to another projection and
 cache the results, for use in Lizard animations."""
 
-
+import logging
 import os
 import shlex
 import subprocess
 import tempfile
 
+from django.conf import settings
 
-def reprojected_image(geotiff_path, srs, bbox, width, height):
+logger = logging.getLogger(__name__)
+
+
+def reprojected_image(geotiff_path, srs, bbox, width, height, create=True):
     """Reprojects the geotiff in geotiff_path to the projection given
     with srs, takes the area given in bbox (minx, miny, maxx, maxy in
     the destination projection), and puts it in a width x height
@@ -17,8 +21,11 @@ def reprojected_image(geotiff_path, srs, bbox, width, height):
     result_path = cache_path(geotiff_path, srs, bbox, width, height)
 
     if not os.path.exists(result_path):
-        create_reprojected_image(
-            result_path, geotiff_path, srs, bbox, width, height)
+        if create:
+            create_reprojected_image(
+                result_path, geotiff_path, srs, bbox, width, height)
+        else:
+            return None
 
     return result_path
 
@@ -30,7 +37,17 @@ def cache_path(geotiff_path, srs, bbox, width, height):
 
     If the directory doesn't exist yet, create it.
     """
+
+    # The srs usually has a ':' in it (like "EPSG:3857"). That
+    # character isn't allowed in Windows paths, and for some reason we
+    # use Windows file servers.
+    srs = srs.replace(':', '_')
+
+    if geotiff_path.startswith("/"):
+        geotiff_path = geotiff_path[1:]
+
     dirname = os.path.join(
+        getattr(settings, 'GEOTIFF_ANIMATION_CACHE_DIR', '/tmp'),
         "{0}-{1}".format(geotiff_path, srs),
         "{0}-{1}-{2}-{3}".format(*bbox))
 

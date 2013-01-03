@@ -19,8 +19,8 @@ TRANSFORM = osr.CoordinateTransformation(WGS84, GOOGLEMERCATOR)
 logger = logging.getLogger(__name__)
 
 
-def time_2_path(datetime):
-    formatted = datetime.strftime("%Y-%m-%d-%H-%M")
+def time_2_path(date_time):
+    formatted = date_time.strftime("%Y-%m-%d-%H-%M")
     #fn = hashlib.md5(str(datetime)).hexdigest() + '.tiff'
     fn = '{}.tiff'.format(formatted)
     return os.path.join(settings.GEOTIFF_DIR, fn)
