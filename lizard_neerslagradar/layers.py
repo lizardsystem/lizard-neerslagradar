@@ -10,8 +10,6 @@ graph pops up."""
 
 import datetime
 import logging
-import pandas
-from pydap import client
 import pytz
 
 from django.conf import settings
@@ -30,97 +28,12 @@ from lizard_rainapp.calculations import UNIT_TO_TIMEDELTA
 
 from nens_graph.rainapp import RainappGraph
 
-from lizard_neerslagradar import projections
+from lizard_neerslagradar import dates
 from lizard_neerslagradar import models
+from lizard_neerslagradar import projections
+from lizard_neerslagradar import thredds
 
 logger = logging.getLogger(__name__)
-
-
-DATASET_URL = 'http://gmdb.lizard.net/thredds/dodsC/radar/radar.nc'
-
-UTC = pytz.utc
-UTC_2000 = UTC.localize(datetime.datetime(2000, 1, 1))
-
-
-def minutes_since_2000_to_utc(minutes_since_2000):
-    return UTC_2000 + datetime.timedelta(minutes=minutes_since_2000)
-
-
-def utc_to_minutes_since_2000(utc_datetime):
-    return int((utc_datetime - UTC_2000).total_seconds() / 60)
-
-
-def to_utc(datetime_object):
-    """If datetime is naive, assume it is UTC and turn it into a UTC
-    date. If it has an associated timezone, translate to UTC."""
-
-    if datetime_object.utcoffset() is None:
-        return UTC.localize(datetime_object)
-    else:
-        return datetime_object.astimezone(UTC)
-
-
-class Timeseries(object):
-    """Class copied from the in-progress lizard-datasource. Should be
-    imported from somewhere later."""
-    def __init__(
-        self,
-        timeseries_dict=None,
-        timeseries_pandas=None,
-        timeseries_times=None, timeseries_values=None):
-        """
-        Can be called with either:
-
-        timeseries_dict, a dict with UTC datetimes as keys and floats
-        as values.
-
-        timeseries_pandas, a pandas timeseries.
-
-        timeseries_times and timeseries_values, two iterables of equal
-        length containing the times (UTC datetimes) and values of the
-        timeseries."""
-        if timeseries_dict is not None:
-            self.timeseries = pandas.Series(timeseries_dict)
-        elif timeseries_pandas is not None:
-            self.timeseries = timeseries_pandas.copy()
-        elif timeseries_times is not None and timeseries_values is not None:
-            self.timeseries = pandas.Series(
-                index=timeseries_times, data=timeseries_values)
-        else:
-            raise ValueError("Timeseries.__init__ called incorrectly.")
-
-    def dates(self):
-        return self.timeseries.keys()
-
-    def values(self):
-        return list(self.timeseries)
-
-    def iter_items(self):
-        return ((k, self.timeseries[k]) for k in self.timeseries.keys())
-
-
-def get_timeseries(start_date, end_date, identifier):
-    pixel_x, pixel_y = identifier['identifier']
-
-    start_minutes_since_2000 = utc_to_minutes_since_2000(start_date)
-    end_minutes_since_2000 = utc_to_minutes_since_2000(end_date)
-
-    dataset = client.open_url(DATASET_URL)
-
-    selected_dates = ((dataset.time >= start_minutes_since_2000) &
-                      (dataset.time <= end_minutes_since_2000))
-
-    if not any(selected_dates):
-        return None
-
-    dates = [minutes_since_2000_to_utc(d)
-             for d in dataset['time'][selected_dates]]
-
-    series = [max(s, 0)
-              for s in
-              dataset['rain']['rain'][selected_dates, pixel_x, pixel_y]]
-
-    return Timeseries(timeseries_times=dates, timeseries_values=series)
 
 
 class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
@@ -199,8 +112,8 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         tz = pytz.timezone(settings.TIME_ZONE)
         today_site_tz = tz.localize(datetime.datetime.now())
 
-        start_date_utc = to_utc(start_date)
-        end_date_utc = to_utc(end_date)
+        start_date_utc = dates.to_utc(start_date)
+        end_date_utc = dates.to_utc(end_date)
 
         graph = GraphClass(start_date_utc,
                            end_date_utc,
@@ -255,10 +168,10 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
 
     def values(self, identifier, start_date, end_date):
         # Convert start and end dates to utc.
-        start_date_utc = to_utc(start_date)
-        end_date_utc = to_utc(end_date)
+        start_date_utc = dates.to_utc(start_date)
+        end_date_utc = dates.to_utc(end_date)
 
-        timeseries = get_timeseries(
+        timeseries = thredds.get_timeseries(
             start_date_utc, end_date_utc, identifier)
 
         if timeseries:
@@ -285,8 +198,8 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
             layout_options['request'])
 
         # Convert start and end dates to utc.
-        start_date_utc = to_utc(start_date)
-        end_date_utc = to_utc(end_date)
+        start_date_utc = dates.to_utc(start_date)
+        end_date_utc = dates.to_utc(end_date)
 
         td_windows = [datetime.timedelta(days=2),
                       datetime.timedelta(days=1),

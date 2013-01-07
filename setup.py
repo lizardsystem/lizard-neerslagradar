@@ -25,6 +25,7 @@ install_requires = [
     'pyproj',
     'GDAL',
     'pydap',
+    'pydap.handlers.hdf5',
     'factory_boy',
     'mock'
     ],
