@@ -110,8 +110,14 @@ class DefaultView(NeerslagRadarView):
         workspace_edit = WorkspaceEdit.get_or_create(
             request.session.session_key, request.user)
 
+        if request.user.is_authenticated():
+            layer_json = json.dumps({
+                    'userid': request.user.id})
+        else:
+            layer_json = json.dumps({})
+
         workspace_edit.add_workspace_item(
-            "Neerslagradar", "adapter_neerslagradar", "{}")
+            "Neerslagradar", "adapter_neerslagradar", layer_json)
 
         return super(DefaultView, self).dispatch(request, *args, **kwargs)
 

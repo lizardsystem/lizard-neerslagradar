@@ -5,7 +5,8 @@ Changelog of lizard-neerslagradar
 0.8 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Mouseovers, popups etc are now only shown if the user actually has
+  access to this region (issue 8).
 
 
 0.7 (2013-01-03)

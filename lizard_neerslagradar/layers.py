@@ -10,9 +10,12 @@ graph pops up."""
 
 import datetime
 import logging
+import mapnik
 import pytz
 
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.auth.models import AnonymousUser
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils import simplejson as json
@@ -44,7 +47,30 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         return (u'{0}, cel ({1} {2})'
                 .format(region_name, *pixel).encode('utf8'))
 
+    def _user(self):
+        """Finds the current user, or returns the AnonymousUser if not
+        found."""
+        if 'userid' in self.layer_arguments:
+            try:
+                return User.objects.get(pk=self.layer_arguments['userid'])
+            except User.DoesNotExist:
+                pass
+        return AnonymousUser()
+
+    def _user_has_access(self, google_x, google_y):
+        """Gets the current user's extent and checks if the
+        coordinates are inside the rectangle."""
+
+        extent = models.Region.extent_for_user(self._user())
+        return (
+            extent and
+            (float(extent['left']) <= google_x <= float(extent['right'])) and
+            (float(extent['bottom']) <= google_y <= float(extent['top'])))
+
     def search(self, google_x, google_y, radius=None):
+        if not self._user_has_access(google_x, google_y):
+            return []
+
         lon, lat = coordinates.google_to_wgs84(google_x, google_y)
         rd_x, rd_y = coordinates.google_to_rd(google_x, google_y)
 
