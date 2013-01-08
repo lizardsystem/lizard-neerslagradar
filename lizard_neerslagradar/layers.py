@@ -97,8 +97,51 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
                 }]
 
     def layer(self, layer_ids=None, webcolor=None, request=None):
-        """We have no layers."""
-        return [], {}
+        """Draw the user's region(s)."""
+        user = self._user()
+        if not user.is_authenticated():
+            return [], {}
+
+        query = str("""
+           (SELECT
+                1 AS value,
+                region.geometry AS geometry
+            FROM
+                lizard_neerslagradar_region region
+            INNER JOIN
+                lizard_neerslagradar_region_users regionusers
+            ON
+                region.id = regionusers.region_id
+            WHERE
+                regionusers.user_id = {userid}
+            ) AS data
+            """.format(userid=user.id))
+
+        style = mapnik.Style()
+        rule = mapnik.Rule()
+        inside = mapnik.PolygonSymbolizer(mapnik.Color("#0000bb"))
+        inside.fill_opacity = 0.15
+        rule.symbols.append(inside)
+        outside = mapnik.LineSymbolizer(mapnik.Color("#0000bb"), 1)
+        outside.fill_opacity = 1
+        rule.symbols.append(outside)
+        style.rules.append(rule)
+
+        default_database = settings.DATABASES['default']
+        datasource = mapnik.PostGIS(
+            host=default_database['HOST'],
+            user=default_database['USER'],
+            password=default_database['PASSWORD'],
+            dbname=default_database['NAME'],
+            table=query,
+            geometry_field='geometry',
+        )
+        layer = mapnik.Layer("Gemeenten", coordinates.WGS84)
+        layer.datasource = datasource
+
+        layer.styles.append('neerslagstyle')
+
+        return [layer], {'neerslagstyle': style}
 
     def location(self, identifier, region_name, layout=None):
         name = self._grid_name(region_name, identifier)

@@ -8,6 +8,7 @@ Changelog of lizard-neerslagradar
 - Mouseovers, popups etc are now only shown if the user actually has
   access to this region (issue 8).
 
+- Show region(s) of the logged in user as a map layer.
 
 0.7 (2013-01-03)
 ----------------
