@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.8 (unreleased)
+0.8 (2013-01-08)
 ----------------
 
 - Mouseovers, popups etc are now only shown if the user actually has
