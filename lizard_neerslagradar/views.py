@@ -2,6 +2,7 @@ import datetime
 import logging
 import pytz
 
+from django.conf import settings
 from django.http import HttpResponse
 from django.http import HttpResponseNotFound
 from django.views.generic.base import View
@@ -154,7 +155,11 @@ class DefaultView(NeerslagRadarView):
             logger.debug("Checking path: {0}".format(p))
             if os.path.exists(p):
                 data.append({
-                        'datetime': dt.strftime("%Y-%m-%dT%H:%M:00.000Z"),
+                        # Translate the UTC datetime to the timezone
+                        # in Settings
+                        'datetime': (
+                            dt.astimezone(pytz.timezone(settings.TIME_ZONE)).
+                            strftime("%Y-%m-%dT%H:%M")),
                         })
         logger.debug("Data: {0}".format(data))
 
@@ -204,7 +209,7 @@ class WmsView(View):
 
         if png is None:
             # It didn't exist -- return 404.
-            raise HttpResponseNotFound(
+            return HttpResponseNotFound(
                 "Geotiff corresponding to WMS request not found.")
 
         # Return the HttpResponse

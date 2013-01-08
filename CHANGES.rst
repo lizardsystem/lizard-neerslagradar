@@ -10,6 +10,10 @@ Changelog of lizard-neerslagradar
 
 - Show region(s) of the logged in user as a map layer.
 
+- Show times in the correct timezone. They are translated from UTC to
+  the site's timezone settings in Python, and rendered as-is in
+  Javascript.
+
 0.7 (2013-01-03)
 ----------------
 
