@@ -197,6 +197,22 @@ class WmsView(View):
         else:
             raise Exception('No time provided')
 
+        # Translate from the site's timezone to UTC
+        # time_from is a UTC datetime, but that's incorrect, it's
+        # actually in the site's timezone. So we have to turn it into
+        # a naive datetime first.
+        time_from = datetime.datetime(
+            year=time_from.year,
+            month=time_from.month,
+            day=time_from.day,
+            hour=time_from.day,
+            minute=time_from.minute)
+        # Get the site timezone
+        tz = pytz.timezone(settings.TIME_ZONE)
+        # Translate to UTC
+        time_from = tz.localize(time_from).astimezone(pytz.UTC)
+
+        # Get the path for this datetime
         path = netcdf.time_2_path(time_from)
 
         return self.serve_geotiff(path, width, height, bbox, srs, opacity)
