@@ -205,7 +205,7 @@ class WmsView(View):
             year=time_from.year,
             month=time_from.month,
             day=time_from.day,
-            hour=time_from.day,
+            hour=time_from.hour,
             minute=time_from.minute)
         # Get the site timezone
         tz = pytz.timezone(settings.TIME_ZONE)
