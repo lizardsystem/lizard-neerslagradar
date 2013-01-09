@@ -2,8 +2,8 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.9 (unreleased)
-----------------
+0.8.1 (2013-01-09)
+------------------
 
 - Fix bug in translating the local times back to UTC when rendering
   geotiffs.
