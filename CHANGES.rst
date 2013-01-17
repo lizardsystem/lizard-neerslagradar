@@ -2,8 +2,8 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.9 (unreleased)
-----------------
+0.8.2 (2013-01-17)
+------------------
 
 - Remove console.log statement that gives problems in IE.
 
