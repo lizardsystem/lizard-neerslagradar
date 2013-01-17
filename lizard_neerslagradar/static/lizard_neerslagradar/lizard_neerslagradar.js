@@ -146,7 +146,6 @@
 
     for (var i=0; i < lizard_neerslagradar.animation_datetimes.length; i++) {
         var dt = moment.utc(lizard_neerslagradar.animation_datetimes[i].datetime);
-        console.log("Dt = "+lizard_neerslagradar.animation_datetimes[i].datetime);
 
         if (lizard_neerslagradar.user_logged_in) {
             layers.push(new MyLayer(dt, 0.2, full_bbox));
