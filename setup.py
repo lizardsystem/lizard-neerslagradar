@@ -17,6 +17,8 @@ install_requires = [
     'lizard-ui >= 4.12',
     'lizard-map >= 4.10',
     'lizard-rainapp >= 1.9',  # We use this for the herhalingstijden code
+    'lizard-fewsjdbc',  # For timeseries data
+    'lizard-datasource',  # Handy API to fewsjdbc
     'numpy',
     'Pillow',
     'pandas',

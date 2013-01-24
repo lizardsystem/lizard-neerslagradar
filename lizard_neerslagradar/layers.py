@@ -20,10 +20,13 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils import simplejson as json
 
+from lizard_datasource import datasource
+
 from lizard_map import coordinates
 from lizard_map import workspace
 from lizard_map.adapter import Graph, FlotGraph
 from lizard_map.daterange import current_start_end_dates
+from lizard_map.models import Setting
 
 from lizard_rainapp.calculations import t_to_string
 from lizard_rainapp.calculations import rain_stats
@@ -34,9 +37,18 @@ from nens_graph.rainapp import RainappGraph
 from lizard_neerslagradar import dates
 from lizard_neerslagradar import models
 from lizard_neerslagradar import projections
-from lizard_neerslagradar import thredds
 
 logger = logging.getLogger(__name__)
+
+
+def get_datasource():
+    """Return the datasource used for the timeseries."""
+    # The choices made are defined as a lizard-map setting.
+    choices_made_json = Setting.get("neerslagradar_datasource")
+
+    # Get the datasource
+    return datasource.datasource(
+        datasource.ChoicesMade(json=choices_made_json))
 
 
 class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
@@ -128,7 +140,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         style.rules.append(rule)
 
         default_database = settings.DATABASES['default']
-        datasource = mapnik.PostGIS(
+        data_source = mapnik.PostGIS(
             host=default_database['HOST'],
             user=default_database['USER'],
             password=default_database['PASSWORD'],
@@ -137,7 +149,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
             geometry_field='geometry',
         )
         layer = mapnik.Layer("Gemeenten", coordinates.WGS84)
-        layer.datasource = datasource
+        layer.datasource = data_source
 
         layer.styles.append('neerslagstyle')
 
@@ -236,18 +248,28 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         return graph.render()
 
     def values(self, identifier, start_date, end_date):
+        ds = get_datasource()
+
+        if not ds:
+            return []
+
         # Convert start and end dates to utc.
         start_date_utc = dates.to_utc(start_date)
         end_date_utc = dates.to_utc(end_date)
 
-        timeseries = thredds.get_timeseries(
-            start_date_utc, end_date_utc, identifier)
+        cell_x, cell_y = identifier['identifier']
+        cell_x += 1
+        cell_y += 1
+        identi = "CEL_{0:03d}_{1:03d}_of_500_490".format(cell_x, cell_y)
+
+        timeseries = ds.timeseries(
+            identi, start_date_utc, end_date_utc)
 
         if timeseries:
             return [{
                     'datetime': k,
                     'value': v,
-                    'unit': 'mm/5min'} for (k, v) in timeseries.iter_items()]
+                    'unit': 'mm/5min'} for (k, v) in timeseries.data()]
         else:
             return []
 

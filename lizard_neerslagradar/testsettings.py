@@ -28,6 +28,8 @@ INSTALLED_APPS = [
     'lizard_map',
     'lizard_ui',
     'lizard_security',
+    'lizard_fewsjdbc',
+    'lizard_datasource',
     'compressor',
     'south',
     'django_nose',
