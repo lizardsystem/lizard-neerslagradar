@@ -2,8 +2,8 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.11 (unreleased)
------------------
+0.10.1 (2013-01-24)
+-------------------
 
 - Accept shapefiles with either "NAAM" or "NAME".
 
