@@ -5,7 +5,9 @@ Changelog of lizard-neerslagradar
 0.10 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Superuser can see timeseries in the entire extent.
+
+- Always have an admin interface, not just when DEBUG=True.
 
 
 0.9 (2013-01-24)

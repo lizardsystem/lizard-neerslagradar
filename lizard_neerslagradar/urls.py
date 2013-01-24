@@ -20,6 +20,7 @@ urlpatterns = patterns(
      'lizard_neerslagradar.views.map_location_load_default',
      {},
      'lizard_map.map_location_load_default'),
+    (r'^admin/', include(admin.site.urls)),
     )
 
 
@@ -28,5 +29,4 @@ if settings.DEBUG:
     urlpatterns += patterns(
         '',
         (r'', include('staticfiles.urls')),
-        (r'^admin/', include(admin.site.urls)),
     )

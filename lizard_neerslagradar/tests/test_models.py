@@ -75,6 +75,14 @@ class TestRegion(TestCase):
         mocked_bottomright.assert_called_with(
             499, 489, to_projection=coordinates.google_projection)
 
+    def test_superuser_gets_an_extent_even_without_regions(self):
+        user = User.objects.create_superuser(
+            'admin',
+            'test@example.com',
+            'some_password')
+        extent = models.Region.extent_for_user(user)
+        self.assertNotEquals(extent, None)
+
     def test_extent_returned(self):
         user = UserF.create()
         region = RegionF.create()
