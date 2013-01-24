@@ -28,7 +28,11 @@ def import_regions_from_shapefile(shapefile):
     layer = shapefile.GetLayer()
 
     for feature in layer:
-        name = feature.GetField('NAME')
+        # Try both 'NAME' and 'NAAM'
+        try:
+            name = feature.GetField('NAME')
+        except ValueError:
+            name = feature.GetField('NAAM')
 
         try:
             region = models.Region.objects.get(name=name)
