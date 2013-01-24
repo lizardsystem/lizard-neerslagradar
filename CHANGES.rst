@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.10 (unreleased)
+0.10 (2013-01-24)
 -----------------
 
 - Superuser can see timeseries in the entire extent.
