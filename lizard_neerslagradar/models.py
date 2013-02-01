@@ -91,6 +91,11 @@ class Region(models.Model):
         multiple regions, for now we just return the first. Returns
         None if none found."""
 
+        # Suggestion by Reinout: lizard-security enables a "tread local" with
+        # the request on it. You could use the possible user object on that
+        # request to try and filter out that user's region and prefer that one
+        # to the others?
+
         point_geom = GEOSGeometry('POINT({0} {1})'.format(*point), srid=4326)
         regions = cls.objects.filter(geometry__contains=point_geom)
 
