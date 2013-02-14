@@ -1,4 +1,4 @@
-from setuptools import setup
+Rzom setuptools import setup
 
 version = '0.10.3.dev0'
 
@@ -22,7 +22,7 @@ install_requires = [
     'mock',
     'netCDF4',
     'numpy',
-    'openradar',
+    'openradar >= 0.3.1',
     'pandas',
     'Pillow',
     'pydap',

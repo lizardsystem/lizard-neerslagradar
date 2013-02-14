@@ -5,7 +5,7 @@ Changelog of lizard-neerslagradar
 0.10.3 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Require at least openradar 0.3.1
 
 
 0.10.2 (2013-02-14)
