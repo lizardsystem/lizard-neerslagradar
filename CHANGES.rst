@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.10.2 (unreleased)
+0.10.2 (2013-02-14)
 -------------------
 
 - Use openradar package to get values from opendap for graph.
