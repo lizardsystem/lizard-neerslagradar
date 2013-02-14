@@ -38,6 +38,8 @@ from lizard_neerslagradar import dates
 from lizard_neerslagradar import models
 from lizard_neerslagradar import projections
 
+from openradar import products
+
 logger = logging.getLogger(__name__)
 
 
@@ -248,30 +250,14 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         return graph.render()
 
     def values(self, identifier, start_date, end_date):
-        ds = get_datasource()
-
-        if not ds:
-            return []
-
-        # Convert start and end dates to utc.
-        start_date_utc = dates.to_utc(start_date)
-        end_date_utc = dates.to_utc(end_date)
-
         cell_x, cell_y = identifier['identifier']
-        cell_x += 1
-        cell_y += 1
-        identi = "CEL_{0:03d}_{1:03d}_of_500_490".format(cell_x, cell_y)
-
-        timeseries = ds.timeseries(
-            identi, start_date_utc, end_date_utc)
-
-        if timeseries:
-            return [{
-                    'datetime': k,
-                    'value': v,
-                    'unit': 'mm/5min'} for (k, v) in timeseries.data()]
-        else:
-            return []
+        #end_date = dates.to_utc(datetime.datetime.utcnow())
+        #start_date = end_date - datetime.timedelta(hours=1)
+        values = products.get_values_from_opendap(x=cell_x,
+                                                  y=cell_y,
+                                                  start_date=start_date,
+                                                  end_date=end_date)
+        return values
 
     def html(self, identifiers=None, layout_options=None):
         """

@@ -9,27 +9,27 @@ long_description = '\n\n'.join([
     ])
 
 install_requires = [
-    'simplejson >= 2.3.0, <2.5.0',
-    'numpy',
     'Django',
     'django-extensions',
     'django-nose',
-    'lizard-ui >= 4.12',
+    'factory_boy',
+    'GDAL',
+    'lizard-datasource',  # Handy API to fewsjdbc
+    'lizard-fewsjdbc',  # For timeseries data
     'lizard-map >= 4.10',
     'lizard-rainapp >= 1.9',  # We use this for the herhalingstijden code
-    'lizard-fewsjdbc',  # For timeseries data
-    'lizard-datasource',  # Handy API to fewsjdbc
-    'numpy',
-    'Pillow',
-    'pandas',
+    'lizard-ui >= 4.12',
+    'mock',
     'netCDF4',
-    'python-dateutil >= 1.5, <2.0',
-    'pyproj',
-    'GDAL',
+    'numpy',
+    'openradar',
+    'pandas',
+    'Pillow',
     'pydap',
     'pydap.handlers.hdf5',
-    'factory_boy',
-    'mock'
+    'pyproj',
+    'python-dateutil >= 1.5, <2.0',
+    'simplejson >= 2.3.0, <2.5.0',
     ],
 
 tests_require = [
