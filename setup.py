@@ -1,4 +1,4 @@
-Rzom setuptools import setup
+from setuptools import setup
 
 version = '0.10.3.dev0'
 
