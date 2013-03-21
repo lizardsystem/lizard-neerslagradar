@@ -38,7 +38,14 @@ from lizard_neerslagradar import dates
 from lizard_neerslagradar import models
 from lizard_neerslagradar import projections
 
-from openradar import products
+import openradar.products
+import openradar.utils
+
+# Hardcoded constants for the legend.
+MAX_RAIN = 2
+LEGEND_COLORS_NAME = 'jet'
+THRESHOLD = 0.08
+MM_PER_HOUR_VALUES = [1, 2, 5, 10, 20, 50]
 
 logger = logging.getLogger(__name__)
 
@@ -253,10 +260,11 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         cell_x, cell_y = identifier['identifier']
         #end_date = dates.to_utc(datetime.datetime.utcnow())
         #start_date = end_date - datetime.timedelta(hours=1)
-        values = products.get_values_from_opendap(x=cell_x,
-                                                  y=cell_y,
-                                                  start_date=start_date,
-                                                  end_date=end_date)
+        values = openradar.products.get_values_from_opendap(
+            x=cell_x,
+            y=cell_y,
+            start_date=start_date,
+            end_date=end_date)
         return values
 
     def html(self, identifiers=None, layout_options=None):
@@ -342,3 +350,40 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
                 'info': info
             }
         )
+
+    def legend(self, updates=None):
+        """Return legend.
+
+        Return value should be a list of dicts, every dict looking like
+        ``{'img_url': <url>, 'description': <description>}``.
+
+        We use code from openradar to figure out the coloring, with some
+        hardcoded defaults that could wreak us later on.
+
+        """
+        icon_style_template = {'icon': 'empty.png',
+                               'mask': ('empty_mask.png', ),
+                               'color': (1, 1, 1, 1)}
+        functions = openradar.utils.rain_kwargs(max_rain=MAX_RAIN,
+                                                 name=LEGEND_COLORS_NAME,
+                                                 threshold=THRESHOLD)
+        normalize = functions['normalize']
+        colormap = functions['colormap']
+        mm_per_5min_values = [value / 12.0 for value in MM_PER_HOUR_VALUES]
+        rgba_values = list(colormap(normalize(mm_per_5min_values)))
+        # ^^^ List of ``[1, 0.5,  0.7, 1]`` lists.
+
+        result = []
+        for index, value in enumerate(MM_PER_HOUR_VALUES):
+            description = "%s mm/u" % value
+            r, g, b, a = rgba_values[index]
+            if not a:
+                # Transparent, not visible, so don't show it.
+                continue
+            icon_style = icon_style_template.copy()
+            icon_style.update({
+                    'color': (r, g, b)})
+            img_url = self.symbol_url(icon_style=icon_style)
+            result.append({'img_url': img_url,
+                                  'description': description})
+        return result
