@@ -4,47 +4,47 @@
 
 {% block css %}
   {{ block.super }}
-<link rel="stylesheet"
-      href="{{ STATIC_URL }}lizard_neerslagradar/lizard_neerslagradar.css"
-      type="text/css"
-      media="screen, projection" />
+  <link rel="stylesheet"
+        href="{{ STATIC_URL }}lizard_neerslagradar/lizard_neerslagradar.css"
+        type="text/css"
+        media="screen, projection" />
 {% endblock css %}
 
 {% block map-javascript %}
-{{ block.super }}
-<script type="text/javascript">
+  {{ block.super }}
+  <script type="text/javascript">
 
-{% comment %} If user isn't logged in, we show an animation of the
-whole area. If he is, we still show the whole animation but should
-give an extra parameter to the view so that it has a low opacity, and
-then we draw a high opacity map of the user's region over it.
-{% endcomment %}
+    {% comment %} If user isn't logged in, we show an animation of the
+    whole area. If he is, we still show the whole animation but should
+    give an extra parameter to the view so that it has a low opacity, and
+    then we draw a high opacity map of the user's region over it.
+    {% endcomment %}
 
-var lizard_neerslagradar = lizard_neerslagradar || {};
+    var lizard_neerslagradar = lizard_neerslagradar || {};
 
-lizard_neerslagradar.wms_base_url = '{% url lizard_neerslagradar.wms %}';
-lizard_neerslagradar.fixed_image_layer_bbox = '{{ view.bbox }}';
-lizard_neerslagradar.fixed_start_dt = '{{ view.start_dt }}';
+    lizard_neerslagradar.wms_base_url = '{% url lizard_neerslagradar.wms %}';
+    lizard_neerslagradar.fixed_image_layer_bbox = '{{ view.bbox }}';
+    lizard_neerslagradar.fixed_start_dt = '{{ view.start_dt }}';
 
-lizard_neerslagradar.user_logged_in = {% if view.user_logged_in %}true{% else %}false{% endif %};
-lizard_neerslagradar.animation_datetimes = {{ view.animation_datetimes|safe }};
-{% if view.user_logged_in %}
-lizard_neerslagradar.region_bbox = '{{ view.region_bbox }}';
-{% endif %}
-</script>
-<script type="text/javascript"
-        src="{{ STATIC_URL }}lizard_neerslagradar/lizard_neerslagradar.js"></script>
+    lizard_neerslagradar.user_logged_in = {% if view.user_logged_in %}true{% else %}false{% endif %};
+    lizard_neerslagradar.animation_datetimes = {{ view.animation_datetimes|safe }};
+    {% if view.user_logged_in %}
+      lizard_neerslagradar.region_bbox = '{{ view.region_bbox }}';
+    {% endif %}
+  </script>
+  <script type="text/javascript"
+          src="{{ STATIC_URL }}lizard_neerslagradar/lizard_neerslagradar.js"></script>
 {% endblock %}
 
 {% block sidebar %}
-<h2>Animatie</h2>
-<h3>Voortgang laden radarbeelden</h3>
-<div id="progressbar" class="progress progress-striped active">
+  <h2>Animatie</h2>
+  <h3>Voortgang laden radarbeelden</h3>
+  <div id="progressbar" class="progress progress-striped active">
     <div class="bar" style="width: 0%;"></div>
-</div>
-<h3>Besturing animatie</h3>
-<button id="animate" class="btn btn-info"><i class="icon-play"></i> <span>Start animatie</span></button>
-<h3>Tijd</h3>
-<div id="timeslider"></div>
-<div id="currentdt">N.v.t.</div>
+  </div>
+  <h3>Besturing animatie</h3>
+  <button id="animate" class="btn btn-info"><i class="icon-play"></i> <span>Start animatie</span></button>
+  <h3>Tijd</h3>
+  <div id="timeslider"></div>
+  <div id="currentdt">N.v.t.</div>
 {% endblock %}
