@@ -36,6 +36,8 @@ TIFF_BBOX = ', '.join([
 ])
 
 ANIMATION_STEP = 5  # Minutes
+DEFAULT_ANIMATION_HOURS = 3
+LOGGED_IN_ANIMATION_HOURS = 24
 
 
 def utc_now():
@@ -71,7 +73,7 @@ def map_location_load_default(request):
     return lizard_map.views.map_location_load_default(request)
 
 
-def animation_datetimes(today, hours_before_now=24):
+def animation_datetimes(today, hours_before_now=DEFAULT_ANIMATION_HOURS):
     """Generator that yields all datetimes corresponding to animation
     steps in the ``hours_before_now`` hours before 'today'."""
 
@@ -131,17 +133,21 @@ class DefaultView(NeerslagRadarView):
             return bbox
 
     def animation_datetimes(self):
-        """For every date/time in the last 24 hours, we check if the
-        data is available.  We need at least the "full" geotiff, and
-        if the user is logged in, then possibly a geotiff for the
-        user's region as well.
+        """For every date/time in the last 3 or 24 hours, we check if the data
+        is available.  We need at least the "full" geotiff, and if the user is
+        logged in, then possibly a geotiff for the user's region as well.
 
         Returned JSON is set as a variable in Javascript
         (wms_neerslagradar.html), and used in lizard_neerslagradar.js
         to load the whole animation."""
 
+        if self.user_logged_in():
+            number_of_hours = LOGGED_IN_ANIMATION_HOURS
+        else:
+            number_of_hours = DEFAULT_ANIMATION_HOURS
+
         data = []
-        for dt in animation_datetimes(utc_now()):
+        for dt in animation_datetimes(utc_now(), hours_before_now=number_of_hours):
             p = netcdf.time_2_path(dt)
             p = reproject.cache_path(
                 p, 'EPSG:3857', TIFF_BBOX.split(", "), 525, 497)

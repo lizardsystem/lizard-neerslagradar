@@ -14,7 +14,9 @@ class TestAnimationDatetimes(TestCase):
             hour=15,
             minute=17)
 
-        datetimes = list(views.animation_datetimes(start_date))
+        datetimes = list(views.animation_datetimes(
+                start_date,
+                hours_before_now=24))
 
         self.assertEquals(len(datetimes), 24 * 12)
         self.assertEquals(
