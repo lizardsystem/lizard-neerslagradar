@@ -71,32 +71,33 @@ def map_location_load_default(request):
     return lizard_map.views.map_location_load_default(request)
 
 
-def start_dt_string():
+def start_dt_string(hours_before_now=24):
     now = datetime.datetime.today()
-    yesterday = now - datetime.timedelta(hours=24)
-    minutes = (yesterday.minute // ANIMATION_STEP) * ANIMATION_STEP  # Rounded
-    return yesterday.strftime("%Y-%m-%dT%H:{0}:00.000Z").format(minutes)
+    start = now - datetime.timedelta(hours=hours_before_now)
+    minutes = (start.minute // ANIMATION_STEP) * ANIMATION_STEP  # Rounded
+    return start.strftime("%Y-%m-%dT%H:{0}:00.000Z").format(minutes)
 
 
-def animation_datetimes(today):
+def animation_datetimes(today, hours_before_now=24):
     """Generator that yields all datetimes corresponding to animation
-    steps in the 24 hours before 'today'."""
+    steps in the ``hours_before_now`` hours before 'today'."""
 
-    yesterday = today - datetime.timedelta(hours=24)
+    start = today - datetime.timedelta(hours=hours_before_now)
     step = datetime.timedelta(minutes=ANIMATION_STEP)
 
     # Round the minutes
     current = datetime.datetime(
-        year=yesterday.year,
-        month=yesterday.month,
-        day=yesterday.day,
-        hour=yesterday.hour,
-        minute=(yesterday.minute // ANIMATION_STEP) * ANIMATION_STEP,
-        tzinfo=yesterday.tzinfo)
+        year=start.year,
+        month=start.month,
+        day=start.day,
+        hour=start.hour,
+        minute=(start.minute // ANIMATION_STEP) * ANIMATION_STEP,
+        tzinfo=start.tzinfo)
 
     while current < today:
-        if current >= yesterday:
-            """Rounding may have put 'current' before the 24-hour boundary"""
+        if current >= start:
+            # Rounding may have put 'current' before the
+            # ``hours_before_now``-hour boundary.
             yield current
         current = current + step
 
