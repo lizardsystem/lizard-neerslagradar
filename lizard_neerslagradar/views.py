@@ -1,20 +1,19 @@
 import datetime
 import logging
-import pytz
+import os
 
 from django.conf import settings
 from django.http import HttpResponse
 from django.http import HttpResponseNotFound
-from django.views.generic.base import View
 from django.utils import simplejson as json
-
-import dateutil
-import os
-
-import lizard_map.views
-import lizard_map.coordinates
+from django.views.generic.base import View
 from lizard_map.models import WorkspaceEdit
 from lizard_ui.layout import Action
+import dateutil
+import lizard_map.coordinates
+import lizard_map.views
+import pytz
+
 from lizard_neerslagradar import netcdf
 from lizard_neerslagradar import models
 from lizard_neerslagradar import reproject
