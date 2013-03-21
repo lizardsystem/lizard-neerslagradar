@@ -24,7 +24,6 @@
 
     lizard_neerslagradar.wms_base_url = '{% url lizard_neerslagradar.wms %}';
     lizard_neerslagradar.fixed_image_layer_bbox = '{{ view.bbox }}';
-    lizard_neerslagradar.fixed_start_dt = '{{ view.start_dt }}';
 
     lizard_neerslagradar.user_logged_in = {% if view.user_logged_in %}true{% else %}false{% endif %};
     lizard_neerslagradar.animation_datetimes = {{ view.animation_datetimes|safe }};

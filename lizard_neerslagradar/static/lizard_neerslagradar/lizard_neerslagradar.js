@@ -131,7 +131,6 @@
     var cycle_layers_interval = null;
     var current_layer_idx = -1;
 
-    var start_dt = moment(lizard_neerslagradar.fixed_start_dt);
     var layers = [];
     var regional_layers = [];
 

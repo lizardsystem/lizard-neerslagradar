@@ -71,13 +71,6 @@ def map_location_load_default(request):
     return lizard_map.views.map_location_load_default(request)
 
 
-def start_dt_string(hours_before_now=24):
-    now = datetime.datetime.today()
-    start = now - datetime.timedelta(hours=hours_before_now)
-    minutes = (start.minute // ANIMATION_STEP) * ANIMATION_STEP  # Rounded
-    return start.strftime("%Y-%m-%dT%H:{0}:00.000Z").format(minutes)
-
-
 def animation_datetimes(today, hours_before_now=24):
     """Generator that yields all datetimes corresponding to animation
     steps in the ``hours_before_now`` hours before 'today'."""
@@ -164,9 +157,6 @@ class DefaultView(NeerslagRadarView):
         logger.debug("Data: {0}".format(data))
 
         return json.dumps(data)
-
-    def start_dt(self):
-        return start_dt_string()
 
     @property
     def breadcrumbs(self):
