@@ -5,6 +5,8 @@ Changelog of lizard-neerslagradar
 0.10.3 (unreleased)
 -------------------
 
+- Anonymous users get 3 hours of animation, logged-in ones get 24.
+
 - Added legend.
 
 - Require at least openradar 0.3.1
