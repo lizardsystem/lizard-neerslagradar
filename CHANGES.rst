@@ -2,8 +2,8 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.10.3 (unreleased)
--------------------
+0.11 (2013-03-21)
+-----------------
 
 - Anonymous users get 3 hours of animation, logged-in ones get 24.
 
