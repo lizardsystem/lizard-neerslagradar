@@ -5,6 +5,8 @@ Changelog of lizard-neerslagradar
 0.10.3 (unreleased)
 -------------------
 
+- Added legend.
+
 - Require at least openradar 0.3.1
 
 
