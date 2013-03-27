@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.12 (unreleased)
+0.12 (2013-03-27)
 -----------------
 
 - Modified location name (mostly in the graph). No longer the debug-like
