@@ -65,8 +65,9 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
 
     def _grid_name(self, region_name, pixel):
         """Returns name as a utf8-encoded byte string."""
-        return (u'{0}, cel ({1} {2})'
-                .format(region_name, *pixel).encode('utf8'))
+        # return (u'{0}, cel ({1} {2})'
+        #         .format(region_name, *pixel).encode('utf8'))
+        return u"Neerslag in " % region_name
 
     def _user(self):
         """Finds the current user, or returns the AnonymousUser if not
