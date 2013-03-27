@@ -132,6 +132,13 @@ class DefaultView(NeerslagRadarView):
             logger.debug("BBOX: {0}".format(bbox))
             return bbox
 
+    @property
+    def number_of_hours(self):
+        """Return number of hours we want to show the animation for."""
+        if self.user_logged_in():
+            return LOGGED_IN_ANIMATION_HOURS
+        return DEFAULT_ANIMATION_HOURS
+
     def animation_datetimes(self):
         """For every date/time in the last 3 or 24 hours, we check if the data
         is available.  We need at least the "full" geotiff, and if the user is
@@ -141,13 +148,9 @@ class DefaultView(NeerslagRadarView):
         (wms_neerslagradar.html), and used in lizard_neerslagradar.js
         to load the whole animation."""
 
-        if self.user_logged_in():
-            number_of_hours = LOGGED_IN_ANIMATION_HOURS
-        else:
-            number_of_hours = DEFAULT_ANIMATION_HOURS
-
         data = []
-        for dt in animation_datetimes(utc_now(), hours_before_now=number_of_hours):
+        for dt in animation_datetimes(utc_now(),
+                                      hours_before_now=self.number_of_hours):
             p = netcdf.time_2_path(dt)
             p = reproject.cache_path(
                 p, 'EPSG:3857', TIFF_BBOX.split(", "), 525, 497)
