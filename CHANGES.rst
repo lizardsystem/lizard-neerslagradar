@@ -5,7 +5,9 @@ Changelog of lizard-neerslagradar
 0.12 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Modified location name (mostly in the graph). No longer the debug-like
+  "Nieuwegein, cel (123, 456)", but the less-informative but nicer-looking
+  "Neerslag in Nieuwegein".
 
 
 0.11 (2013-03-21)
