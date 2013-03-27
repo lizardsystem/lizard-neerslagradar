@@ -75,7 +75,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     )
 
 MAP_SHOW_MULTISELECT = False
-MAP_SHOW_DATE_RANGE = False
 
 GEOTIFF_DIR = os.path.join(BUILDOUT_DIR, 'var', 'geotiff')
 RADAR_NC_PATH = '/media/WORKSPACE/lizard-regenradar/radar.nc'
