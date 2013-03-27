@@ -8,6 +8,8 @@ Changelog of lizard-neerslagradar
 - Comfortable admin for the regions (attached users are now shown and you can
   search regions by name).
 
+- Disabled the purple layer over the selected region.
+
 
 0.12 (2013-03-27)
 -----------------
