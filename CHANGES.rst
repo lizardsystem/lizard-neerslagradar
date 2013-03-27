@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.13 (unreleased)
+0.13 (2013-03-27)
 -----------------
 
 - Comfortable admin for the regions (attached users are now shown and you can
