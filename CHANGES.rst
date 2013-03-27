@@ -9,6 +9,8 @@ Changelog of lizard-neerslagradar
   "Nieuwegein, cel (123, 456)", but the less-informative but nicer-looking
   "Neerslag in Nieuwegein".
 
+- Hiding the date selector for not-logged-in users.
+
 
 0.11 (2013-03-21)
 -----------------

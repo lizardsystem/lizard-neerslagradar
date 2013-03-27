@@ -52,3 +52,17 @@ class TestAnimationDatetimes(TestCase):
     def test_number_of_hours2(self):
         view = views.DefaultView()
         self.assertEquals(view.number_of_hours, 24)
+
+    @mock.patch('lizard_neerslagradar.views.DefaultView.user_logged_in',
+                lambda self: False)
+    def test_content_actions1(self):
+        view = views.DefaultView()
+        klasses = [action.klass for action in view.content_actions]
+        self.assertFalse('popup-date-range' in klasses)
+
+    @mock.patch('lizard_neerslagradar.views.DefaultView.user_logged_in',
+                lambda self: True)
+    def test_content_actions2(self):
+        view = views.DefaultView()
+        klasses = [action.klass for action in view.content_actions]
+        self.assertTrue('popup-date-range' in klasses)

@@ -170,6 +170,16 @@ class DefaultView(NeerslagRadarView):
     def breadcrumbs(self):
         return [Action(name='Neerslagradar', url='/')]
 
+    @property
+    def content_actions(self):
+        """Strip out the date range selector if we're not logged in."""
+        actions = super(DefaultView, self).content_actions
+        if not self.user_logged_in():
+            # Strip out the date range selector.
+            actions = [action for action in actions
+                       if action.klass != 'popup-date-range']
+        return actions
+
 
 class WmsView(View):
     def get(self, request):
