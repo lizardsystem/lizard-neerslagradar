@@ -2,4 +2,9 @@ from django.contrib.gis import admin
 from lizard_neerslagradar import models
 
 
-admin.site.register(models.Region, admin.OSMGeoAdmin)
+class RegionAdmin(admin.OSMGeoAdmin):
+    search_fields = ('name',)
+    list_display = ('name', 'users',)
+
+
+admin.site.register(models.Region, RegionAdmin)
