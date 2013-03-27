@@ -98,7 +98,7 @@ def create_projected_geotiffs(stdout, verbose=False):
 
     files_to_keep = set()
 
-    for current in views.animation_datetimes(views.utc_now()):
+    for current in views.animation_datetimes(views.LOGGED_IN_ANIMATION_HOURS):
         if verbose:
             stdout.write(str(current) + "\n")
 
