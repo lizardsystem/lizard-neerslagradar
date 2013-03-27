@@ -22,6 +22,10 @@ urlpatterns = patterns(
      'lizard_neerslagradar.views.map_location_load_default',
      {},
      'lizard_map.map_location_load_default'),
+    # Overridden because we show a 'contact us' popup to not-logged-in users.
+    url(r'^search_coordinates/',
+        'lizard_neerslagradar.views.search_coordinates',
+        name="lizard_map.search_coordinates"),
     (r'^admin/', include(admin.site.urls)),
     )
 

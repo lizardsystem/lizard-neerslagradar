@@ -5,6 +5,7 @@ import os
 from django.conf import settings
 from django.http import HttpResponse
 from django.http import HttpResponseNotFound
+from django.template.loader import render_to_string
 from django.utils import simplejson as json
 from django.views.generic.base import View
 from lizard_map.models import WorkspaceEdit
@@ -240,3 +241,27 @@ class WmsView(View):
         response = HttpResponse(
             open(png, "rb").read(), content_type='image/png')
         return response
+
+
+def search_coordinates(request,
+                       workspace_storage_id=None,
+                       workspace_storage_slug=None,
+                       _format='popup'):
+    """Return info for search popup.
+
+    Our customization: a not-logged-in user gets a 'contact us' page.
+    Override ``lizard_neerslagradar/contact_us.html`` in the site with some
+    real content.
+    """
+    if not request.user.is_authenticated():
+        # Return 'contact us' page.
+        html = render_to_string('lizard_neerslagradar/contact_us.html')
+        # The following is a bit hacked and depends on lizard_map.js' handling
+        # of our result in its ``set_popup_content()`` function.
+        return HttpResponse(json.dumps({'html': [html]}))
+
+    return lizard_map.views.search_coordinates(
+        request,
+        workspace_storage_id=workspace_storage_id,
+        workspace_storage_slug=workspace_storage_slug,
+        _format=_format)
