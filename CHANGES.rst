@@ -11,6 +11,10 @@ Changelog of lizard-neerslagradar
 
 - Hiding the date selector for not-logged-in users.
 
+- Not logged in users get a 'contact us' popup when searching. Override the
+  ``lizard_neerslagradar/contact_us.html`` template in the site with what you
+  really want in the popup.
+
 
 0.11 (2013-03-21)
 -----------------
