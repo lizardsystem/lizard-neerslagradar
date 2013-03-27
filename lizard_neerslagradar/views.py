@@ -73,10 +73,10 @@ def map_location_load_default(request):
     return lizard_map.views.map_location_load_default(request)
 
 
-def animation_datetimes(today, hours_before_now=DEFAULT_ANIMATION_HOURS):
+def animation_datetimes(hours_before_now):
     """Generator that yields all datetimes corresponding to animation
     steps in the ``hours_before_now`` hours before 'today'."""
-
+    today = utc_now()
     start = today - datetime.timedelta(hours=hours_before_now)
     step = datetime.timedelta(minutes=ANIMATION_STEP)
 
@@ -149,8 +149,7 @@ class DefaultView(NeerslagRadarView):
         to load the whole animation."""
 
         data = []
-        for dt in animation_datetimes(utc_now(),
-                                      hours_before_now=self.number_of_hours):
+        for dt in animation_datetimes(self.number_of_hours):
             p = netcdf.time_2_path(dt)
             p = reproject.cache_path(
                 p, 'EPSG:3857', TIFF_BBOX.split(", "), 525, 497)
