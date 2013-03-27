@@ -5,7 +5,8 @@ Changelog of lizard-neerslagradar
 0.13 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Comfortable admin for the regions (attached users are now shown and you can
+  search regions by name).
 
 
 0.12 (2013-03-27)

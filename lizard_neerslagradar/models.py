@@ -21,6 +21,9 @@ class Region(models.Model):
     def __unicode__(self):
         return self.name
 
+    def users_for_the_admin(self):
+        return u', '.join(self.users.all().values_list('username', flat=True))
+
     def google_extent(self):
         xmin, ymin, xmax, ymax = self.geometry.extent
         xming, yming = coordinates.wgs84_to_google(xmin, ymin)
