@@ -24,3 +24,8 @@ class TestGetDatasource(TestCase):
                 arg = ds.call_args[0][0]
                 self.assertTrue(isinstance(arg, datasource.ChoicesMade))
                 self.assertEquals(arg["testing"], "testing")
+
+    def test_grid_name(self):
+        adapter = layers.NeerslagRadarAdapter(None)
+        self.assertEquals(adapter._grid_name('Nieuwegein', (1, 2)),
+                          'Neerslag in Nieuwegein')
