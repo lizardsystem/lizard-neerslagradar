@@ -143,8 +143,8 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         rule = mapnik.Rule()
         inside = mapnik.PolygonSymbolizer(mapnik.Color("#0000bb"))
         inside.fill_opacity = 0.15
-        rule.symbols.append(inside)
-        outside = mapnik.LineSymbolizer(mapnik.Color("#0000bb"), 1)
+        # rule.symbols.append(inside)
+        outside = mapnik.LineSymbolizer(mapnik.Color("#0000bb"), 2)
         outside.fill_opacity = 1
         rule.symbols.append(outside)
         style.rules.append(rule)
