@@ -18,6 +18,9 @@ class Region(models.Model):
     objects = models.GeoManager()
     users = models.ManyToManyField(User)
 
+    class Meta:
+        ordering = ['name',]
+
     def __unicode__(self):
         return self.name
 
@@ -89,20 +92,23 @@ class Region(models.Model):
             }
 
     @classmethod
-    def find_by_point(cls, point):
-        """Point is a (lon, lat) coordinate. If this point is in
-        multiple regions, for now we just return the first. Returns
-        None if none found."""
+    def find_by_point(cls, point, user=None):
+        """Return best matching region for a click on point.
 
-        # Suggestion by Reinout: lizard-security enables a "tread local" with
-        # the request on it. You could use the possible user object on that
-        # request to try and filter out that user's region and prefer that one
-        # to the others?
+        Point is a (lon, lat) coordinate. If this point is in
+        multiple regions, for now we just return the first. Returns
+        None if none found.
+
+        If we have a user, filter regions first on regions attached to the
+        user.
+
+        """
 
         point_geom = GEOSGeometry('POINT({0} {1})'.format(*point), srid=4326)
         regions = cls.objects.filter(geometry__contains=point_geom)
-
+        if user:
+            match = [region for region in regions if user in region.users.all()]
+            if match:
+                return match[0]
         if regions:
             return regions[0]
-        else:
-            return None

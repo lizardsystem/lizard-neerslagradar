@@ -104,3 +104,13 @@ class TestRegion(TestCase):
         RegionF.create()
         regionfound = models.Region.find_by_point((5, 5))
         self.assertEquals(None, regionfound)
+
+    def test_region_returned_for_user(self):
+        RegionF.create(name='amersfoort1')
+        region2 = RegionF.create(name='amersfoort2')
+        user = UserF.create()
+        region2.users.add(user)
+        region2.save()
+        RegionF.create(name='amersfoort3')
+        regionfound = models.Region.find_by_point(TOREN_AMERSFOORT, user=user)
+        self.assertEquals(region2, regionfound)
