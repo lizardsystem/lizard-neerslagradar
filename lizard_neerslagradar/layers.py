@@ -67,8 +67,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         """Returns name as a utf8-encoded byte string."""
         # return (u'{0}, cel ({1} {2})'
         #         .format(region_name, *pixel).encode('utf8'))
-        # return u"Neerslag in %s" % region_name
-        return u"Neerslag in %s" % self._user().username
+        return u"Neerslag in %s" % region_name
 
     def _user(self):
         """Finds the current user, or returns the AnonymousUser if not
@@ -97,7 +96,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         lon, lat = coordinates.google_to_wgs84(google_x, google_y)
         rd_x, rd_y = coordinates.google_to_rd(google_x, google_y)
 
-        region = models.Region.find_by_point((lon, lat))
+        region = models.Region.find_by_point((lon, lat), user=self._user())
         pixel = projections.coordinate_to_composite_pixel(lon, lat)
 
         if region is None or pixel is None:

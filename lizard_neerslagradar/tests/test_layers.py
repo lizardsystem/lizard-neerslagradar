@@ -26,9 +26,6 @@ class TestGetDatasource(TestCase):
                 self.assertEquals(arg["testing"], "testing")
 
     def test_grid_name(self):
-        mock_user = mock.Mock()
-        mock_user.username = 'Nieuwegein'
         adapter = layers.NeerslagRadarAdapter(None)
-        adapter._user = lambda:  mock_user
-        self.assertEquals(adapter._grid_name('does not matter', (1, 2)),
+        self.assertEquals(adapter._grid_name('Nieuwegein', (1, 2)),
                           'Neerslag in Nieuwegein')
