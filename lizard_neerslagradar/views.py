@@ -100,6 +100,7 @@ def animation_datetimes(hours_before_now):
 
 class DefaultView(NeerslagRadarView):
     template_name = 'lizard_neerslagradar/wms_neerslagradar.html'
+    sidebar_is_collapsed = True
 
     def dispatch(self, request, *args, **kwargs):
         """Add in the omnipresent workspace item, then proceed as normal."""

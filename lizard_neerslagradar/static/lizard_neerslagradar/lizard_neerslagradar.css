@@ -1,3 +1,14 @@
+#floating-animation-steering {
+    position: absolute;
+    background-color: white;
+    left: 50px;
+    top: 40px;
+    width: 200px;
+    z-index: 1000;
+    padding: 1em;
+    /* Style to mimick jquery ui popup */
+}
+
 #timeslider {
     margin: 10px;
 }
