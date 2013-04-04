@@ -96,7 +96,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         lon, lat = coordinates.google_to_wgs84(google_x, google_y)
         rd_x, rd_y = coordinates.google_to_rd(google_x, google_y)
 
-        region = models.Region.find_by_point((lon, lat))
+        region = models.Region.find_by_point((lon, lat), user=self._user())
         pixel = projections.coordinate_to_composite_pixel(lon, lat)
 
         if region is None or pixel is None:

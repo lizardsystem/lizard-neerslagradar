@@ -18,6 +18,10 @@ Changelog of lizard-neerslagradar
 
 - Progress bar loses its I'm-busy-loading-stripes when finished.
 
+- Using username for popup name. This selects exactly the right
+  name. Otherwise we'd pick one of the regions the click was made in, which
+  wouldn't always select the right one.
+
 
 0.13 (2013-03-27)
 -----------------
