@@ -16,6 +16,8 @@ Changelog of lizard-neerslagradar
 
   - Sidebar buttons at the bottom are gone, too.
 
+- Progress bar loses its I'm-busy-loading-stripes when finished.
+
 
 0.13 (2013-03-27)
 -----------------
