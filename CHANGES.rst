@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.14 (unreleased)
+0.14 (2013-04-04)
 -----------------
 
 - Less cluttered user interface (based on ideas by Wytze):
