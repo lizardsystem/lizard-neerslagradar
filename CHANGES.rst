@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.15 (unreleased)
+0.15 (2013-04-04)
 -----------------
 
 - Removed some more clutter from the animation window.
