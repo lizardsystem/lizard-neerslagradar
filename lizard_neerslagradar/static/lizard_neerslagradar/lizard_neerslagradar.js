@@ -374,14 +374,20 @@
 
         var is_ready = ratio == 1;
         if (is_ready) {
-            $progressbar.addClass('progress-success').removeClass('active');
+            $progressbar.addClass('progress-success').removeClass('active').removeClass('progress-striped');
             $btn.removeAttr('disabled');
             $slider.slider('enable');
+            // New interaction.
+            $('#loaded-stage').show(200);
+            $('#loading-stage').delay(1500).hide(500);
         }
         else {
-            $progressbar.removeClass('progress-success').addClass('active');
+            $progressbar.removeClass('progress-success').addClass('active').addClass('progress-striped');
             $btn.attr('disabled', 'disabled');
             $slider.slider('disable');
+            // New interaction.
+            $('#loading-stage').show();
+            $('#loaded-stage').hide();
         }
         var pct = ratio * 100 + '%';
         $progressbar.find('.bar').css({width: pct});

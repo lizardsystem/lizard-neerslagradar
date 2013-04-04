@@ -5,7 +5,18 @@ Changelog of lizard-neerslagradar
 0.14 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Less cluttered user interface (based on ideas by Wytze):
+
+  - Sidebar gone.
+
+  - Floating window with the progress indicator and 'run' button.
+
+  - When the loading is done, the progress indicator disappears and the 'run'
+    button is shown.
+
+  - Sidebar buttons at the bottom are gone, too.
+
+- Progress bar loses its I'm-busy-loading-stripes when finished.
 
 
 0.13 (2013-03-27)

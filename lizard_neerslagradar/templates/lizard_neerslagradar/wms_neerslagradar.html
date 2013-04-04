@@ -36,15 +36,25 @@
           src="{{ STATIC_URL }}lizard_neerslagradar/lizard_neerslagradar.js"></script>
 {% endblock %}
 
-{% block sidebar %}
-  <h2>Animatie</h2>
-  <h3>Voortgang laden radarbeelden</h3>
-  <div id="progressbar" class="progress progress-striped active">
-    <div class="bar" style="width: 0%;"></div>
+{% block content %}
+  <div id="floating-animation-steering"
+       class="ui-corner-all ui-widget-content">
+    <div id="loaded-stage" style="display: none;">
+      <p><b>Besturing animatie</b></p>
+      <button id="animate" class="btn btn-info"><i class="icon-play"></i> <span>Start animatie</span></button>
+      <p><b>Tijd</b></p>
+      <div id="timeslider"></div>
+      <div id="currentdt">Niet van toepassing</div>
+    </div>
+    <div id="loading-stage">
+      <p><b>Voortgang laden radarbeelden</b></p>
+      <div id="progressbar" class="progress progress-striped active">
+        <div class="bar" style="width: 0%;"></div>
+      </div>
+    </div>
   </div>
-  <h3>Besturing animatie</h3>
-  <button id="animate" class="btn btn-info"><i class="icon-play"></i> <span>Start animatie</span></button>
-  <h3>Tijd</h3>
-  <div id="timeslider"></div>
-  <div id="currentdt">N.v.t.</div>
-{% endblock %}
+  {{ block.super }}
+{% endblock content %}
+
+{% block sidebar-actions %}
+{% endblock sidebar-actions %}
