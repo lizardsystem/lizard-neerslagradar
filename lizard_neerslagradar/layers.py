@@ -10,36 +10,32 @@ graph pops up."""
 
 import datetime
 import logging
-import mapnik
-import pytz
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils import simplejson as json
-
 from lizard_datasource import datasource
-
 from lizard_map import coordinates
 from lizard_map import workspace
 from lizard_map.adapter import Graph, FlotGraph
 from lizard_map.daterange import current_start_end_dates
 from lizard_map.models import Setting
-
-from lizard_rainapp.calculations import t_to_string
-from lizard_rainapp.calculations import rain_stats
 from lizard_rainapp.calculations import UNIT_TO_TIMEDELTA
-
+from lizard_rainapp.calculations import rain_stats
+from lizard_rainapp.calculations import t_to_string
 from nens_graph.rainapp import RainappGraph
+import mapnik
+import openradar.products
+import openradar.utils
+import pytz
 
 from lizard_neerslagradar import dates
 from lizard_neerslagradar import models
 from lizard_neerslagradar import projections
 
-import openradar.products
-import openradar.utils
 
 # Hardcoded constants for the legend.
 MAX_RAIN = 2
@@ -205,7 +201,6 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
 
         start_date_utc = dates.to_utc(start_date)
         end_date_utc = dates.to_utc(end_date)
-
         graph = GraphClass(start_date_utc,
                            end_date_utc,
                            today=today_site_tz,
@@ -221,9 +216,8 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
                                               start_date_utc,
                                               end_date_utc)
 
-            dates_site_tz = [row['datetime'].astimezone(tz)
-                         for row in cached_value_result]
-
+            dates_utc_timezoneaware = [row['datetime']
+                                       for row in cached_value_result]
             values = [row['value'] for row in cached_value_result]
             units = [row['unit'] for row in cached_value_result]
 
@@ -236,11 +230,12 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
                     # We can draw bars corresponding to period
                     bar_width = graph.get_bar_width(unit_timedelta)
                     offset = -1 * unit_timedelta
-                    offset_dates = [d + offset for d in dates_site_tz]
+                    offset_dates = [d + offset
+                                    for d in dates_utc_timezoneaware]
                 else:
                     # We can only draw spikes.
                     bar_width = 0
-                    offset_dates = dates_site_tz
+                    offset_dates = dates_utc_timezoneaware
                 graph.axes.bar(offset_dates,
                                values,
                                edgecolor='blue',
