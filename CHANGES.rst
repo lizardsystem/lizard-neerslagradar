@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.16 (unreleased)
+0.16 (2013-04-08)
 -----------------
 
 - Fixed date-shifting timezone-related problem.
