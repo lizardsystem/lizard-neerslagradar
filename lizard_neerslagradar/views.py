@@ -47,10 +47,6 @@ def utc_now():
 
 class NeerslagRadarView(lizard_map.views.AppView):
     def start_extent(self):
-        # Hack: we need to have a session right away for toggling ws items.
-        self.request.session[
-            'make_sure_session_is_initialized'] = 'hurray'
-        # End of the hack.
 
         extent = models.Region.extent_for_user(self.request.user)
         logger.debug("In start_extent; extent={0}".format(extent))
@@ -104,6 +100,10 @@ class DefaultView(NeerslagRadarView):
 
     def dispatch(self, request, *args, **kwargs):
         """Add in the omnipresent workspace item, then proceed as normal."""
+        # Hack: we need to have a session right away.
+        request.session[
+            'make_sure_session_is_initialized'] = 'hurray'
+        # End of the hack.
 
         workspace_edit = WorkspaceEdit.get_or_create(
             request.session.session_key, request.user)
