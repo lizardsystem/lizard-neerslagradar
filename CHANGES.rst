@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.17 (unreleased)
+0.17 (2013-04-08)
 -----------------
 
 - Added initialization of request's session in the right place.
