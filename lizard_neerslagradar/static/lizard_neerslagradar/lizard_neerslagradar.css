@@ -1,24 +1,17 @@
-#floating-animation-steering {
-    position: absolute;
-    background-color: white;
-    left: 50px;
-    top: 1em;
-    width: 200px;
-    z-index: 1000;
-    padding: 1em;
-    /* Style to mimick jquery ui popup */
-}
-
 #timeslider {
-    margin: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 #currentdt {
     text-align: center;
 }
 
-#animate {
-    margin-bottom: 18px;
+#animate,
+#timeslider,
+#currentdt,
+#progressbar {
+  float: left;
 }
 
 /* fix jquery ui slider */

@@ -36,22 +36,14 @@
           src="{{ STATIC_URL }}lizard_neerslagradar/lizard_neerslagradar.js"></script>
 {% endblock %}
 
-{% block content %}
-  <div id="floating-animation-steering"
-       class="ui-corner-all ui-widget-content">
-    <div id="loaded-stage" style="display: none;">
-      <button id="animate" class="btn btn-info"><i class="icon-play"></i></button>
-      <div id="timeslider"></div>
-      <div id="currentdt">Niet van toepassing</div>
-    </div>
-    <div id="loading-stage">
-      <div id="progressbar" class="progress progress-striped active">
-        <div class="bar" style="width: 0%;"></div>
-      </div>
-    </div>
+{% block breadcrumbs %}
+  <div id="progressbar" class="progress progress-striped active">
+    <div class="bar" style="width: 0%;"></div>
   </div>
-  {{ block.super }}
-{% endblock content %}
+  <button id="animate" class="btn btn-info"><i class="icon-play"></i></button>
+  <div id="timeslider"></div>
+  <div id="currentdt">&nbsp;</div>
+{% endblock breadcrumbs %}
 
 {% block sidebar-actions %}
 {% endblock sidebar-actions %}

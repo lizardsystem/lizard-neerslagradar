@@ -356,7 +356,6 @@
         });
         if (num_tiles > 0) {
             ratio = 1 - num_loading_tiles / num_tiles;
-            console.log(ratio, num_loading_tiles, num_tiles);
             set_progress(ratio);
         }
         else {
@@ -376,17 +375,11 @@
             $progressbar.addClass('progress-success').removeClass('active').removeClass('progress-striped');
             $btn.removeAttr('disabled');
             $slider.slider('enable');
-            // New interaction.
-            $('#loaded-stage').show(200);
-            $('#loading-stage').delay(1500).hide(500);
         }
         else {
             $progressbar.removeClass('progress-success').addClass('active').addClass('progress-striped');
             $btn.attr('disabled', 'disabled');
             $slider.slider('disable');
-            // New interaction.
-            $('#loading-stage').show();
-            $('#loaded-stage').hide();
         }
         var pct = ratio * 100 + '%';
         $progressbar.find('.bar').css({width: pct});
