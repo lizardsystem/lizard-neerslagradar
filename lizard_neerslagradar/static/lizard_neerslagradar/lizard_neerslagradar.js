@@ -281,14 +281,12 @@
     function start () {
         $btn.find('i').removeClass('icon-play').addClass('icon-pause');
         $btn.addClass('active');
-        $btn.find('span').html('Stop animatie');
         cycle_layers_interval = setInterval(cycle_layers, interval_ms);
     }
 
     function stop () {
         $btn.find('i').removeClass('icon-pause').addClass('icon-play');
         $btn.removeClass('active');
-        $btn.find('span').html('Start animatie');
         clearInterval(cycle_layers_interval);
         cycle_layers_interval = null;
     }
