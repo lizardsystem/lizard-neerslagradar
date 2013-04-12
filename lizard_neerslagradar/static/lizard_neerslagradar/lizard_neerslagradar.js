@@ -434,7 +434,7 @@
     }
 
     function init_neerslagradar () {
-        init_overview();
+        // init_overview();
         init_button();
         init_slider();
         init_progress();
