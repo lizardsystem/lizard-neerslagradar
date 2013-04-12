@@ -8,6 +8,20 @@ Changelog of lizard-neerslagradar
 - Switched off the small overview image. We want the user interface to be
   smaller.
 
+- Moved play/pause button, progress bar etc to the bar above the map, so no
+  longer in its own floating window. Nice!
+
+- After loading the tiles, the animation starts automatically.
+
+- Only the time is shown next to the progress bar, no longer the
+  date. Cleaner, and it is clear anyway that it's today/yesterday. Also the
+  start/stop button doesn't have text anymore; the icon is clear enough on its
+  own.
+
+- The page http-refreshes every 5 (and a bit) minutes.
+
+- No more 'add-to-collage' link.
+
 
 0.17 (2013-04-08)
 -----------------
