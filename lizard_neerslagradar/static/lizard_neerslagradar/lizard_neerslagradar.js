@@ -375,6 +375,10 @@
             $progressbar.addClass('progress-success').removeClass('active').removeClass('progress-striped');
             $btn.removeAttr('disabled');
             $slider.slider('enable');
+            if (!$btn.hasClass('active')) {
+              start();
+            }
+
         }
         else {
             $progressbar.removeClass('progress-success').addClass('active').addClass('progress-striped');
