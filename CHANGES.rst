@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.18 (unreleased)
+0.18 (2013-04-12)
 -----------------
 
 - Switched off the small overview image. We want the user interface to be
