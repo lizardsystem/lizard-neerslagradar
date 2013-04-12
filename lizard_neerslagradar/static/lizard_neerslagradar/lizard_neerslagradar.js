@@ -208,9 +208,11 @@
               paused_at_end = true;
               window.setTimeout(function(){
                 paused_at_end = false;
+                set_layer(0);
               }, 1000);
+            } else {
+              set_layer(next_layer_idx);
             }
-            set_layer(next_layer_idx);
         }
     }
 
