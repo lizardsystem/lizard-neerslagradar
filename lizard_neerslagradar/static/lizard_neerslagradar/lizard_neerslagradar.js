@@ -130,6 +130,7 @@
     var interval_ms = 100;
     var cycle_layers_interval = null;
     var current_layer_idx = -1;
+    var paused_at_end = false;
 
     var layers = [];
     var regional_layers = [];
@@ -197,18 +198,19 @@
         }
         // don't swap layers when we're still loading
         if ((!current_layer || !current_layer.ol_layer.loading) &&
+            (!paused_at_end) &&
             (!lizard_neerslagradar.user_logged_in ||
              !regional_layer ||
              !regional_layer.ol_layer.loading)) {
             // figure out next layer
             var next_layer_idx = (current_layer_idx >= layers.length - 1) ? 0 : current_layer_idx + 1;
             if (next_layer_idx === 0) {
-              window.setTimeout(function() {
-                set_layer(next_layer_idx);
+              paused_at_end = true;
+              window.setTimeout(function(){
+                paused_at_end = false;
               }, 1000);
-            } else {
-              set_layer(next_layer_idx);
             }
+            set_layer(next_layer_idx);
         }
     }
 
