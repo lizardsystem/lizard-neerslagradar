@@ -1,17 +1,27 @@
-#timeslider {
+#slider-wrapper {
     margin-left: 10px;
     margin-right: 10px;
+    width: 100px;
+    height: 35px;
 }
 
 #currentdt {
-    text-align: center;
+    margin-top: 10px;
+}
+
+.progress {
+  margin-bottom: 0;
 }
 
 #animate,
-#timeslider,
+#slider-wrapper,
 #currentdt,
 #progressbar {
-  float: left;
+    xdisplay: inline;
+}
+
+#progressbar {
+    width: 100px;
 }
 
 /* fix jquery ui slider */

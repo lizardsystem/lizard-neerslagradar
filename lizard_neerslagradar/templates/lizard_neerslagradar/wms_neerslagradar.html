@@ -37,12 +37,24 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-  <div id="progressbar" class="progress progress-striped active">
-    <div class="bar" style="width: 0%;"></div>
-  </div>
-  <button id="animate" class="btn btn-info"><i class="icon-play"></i></button>
-  <div id="timeslider"></div>
-  <div id="currentdt">&nbsp;</div>
+  <ul class="nav">
+    <li>
+      <button id="animate" class="btn btn-info"><i class="icon-play"></i></button>
+    </li>
+    <li>
+      <div id="progressbar" class="progress progress-striped active">
+        <div class="bar" style="width: 0%;"></div>
+      </div>
+    </li>
+    <li>
+      <div id="slider-wrapper">
+        <div id="timeslider"></div>
+      </div>
+    </li>
+    <li>
+      <div id="currentdt">&nbsp;</div>
+    </li>
+  </ul>
 {% endblock breadcrumbs %}
 
 {% block sidebar-actions %}
