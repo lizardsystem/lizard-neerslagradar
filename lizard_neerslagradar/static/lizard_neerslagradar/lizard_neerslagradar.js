@@ -202,7 +202,13 @@
              !regional_layer.ol_layer.loading)) {
             // figure out next layer
             var next_layer_idx = (current_layer_idx >= layers.length - 1) ? 0 : current_layer_idx + 1;
-            set_layer(next_layer_idx);
+            if (next_layer_idx === 0) {
+              window.setTimeout(function() {
+                set_layer(next_layer_idx);
+              }, 1000);
+            } else {
+              set_layer(next_layer_idx);
+            }
         }
     }
 
