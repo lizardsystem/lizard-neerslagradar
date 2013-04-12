@@ -1,27 +1,27 @@
-#slider-wrapper {
-    margin-left: 10px;
-    margin-right: 10px;
-    width: 100px;
-    height: 35px;
-}
-
 #currentdt {
     margin-top: 10px;
+    width: 6em;
 }
 
-.progress {
-  margin-bottom: 0;
-}
-
-#animate,
-#slider-wrapper,
-#currentdt,
-#progressbar {
-    xdisplay: inline;
-}
-
-#progressbar {
+div#progressbar {
+    margin-top: 10px;
+    margin-bottom: 0;
+    height: 18px;
     width: 100px;
+    margin-left: 18px;
+    margin-right: 18px;
+}
+
+div#timeslider {
+    height: 0.8em;
+    margin-top: 14px;
+    width: 100px;
+    margin-left: 18px;
+    margin-right: 18px;
+}
+
+button#animate {
+    margin-top: -4px;
 }
 
 /* fix jquery ui slider */
