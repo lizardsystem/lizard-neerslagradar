@@ -266,7 +266,7 @@
             max: layers.length - 1,
             change: function (event, ui) {
                 var layer = layers[ui.value];
-                $("#currentdt").html(layer.dt.format('mm:ss'));
+                $("#currentdt").html(layer.dt.format('HH:mm'));
             },
             slide: function (event, ui) {
                 stop_if_running();
