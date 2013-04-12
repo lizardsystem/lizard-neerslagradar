@@ -356,6 +356,7 @@
         });
         if (num_tiles > 0) {
             ratio = 1 - num_loading_tiles / num_tiles;
+            console.log(ratio, num_loading_tiles, num_tiles);
             set_progress(ratio);
         }
         else {
