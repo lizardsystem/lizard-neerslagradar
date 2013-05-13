@@ -5,7 +5,8 @@ Changelog of lizard-neerslagradar
 0.19 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix for error 500 when visiting the site for the first time: session key not
+  available yet; we use that one for database keys.
 
 
 0.18 (2013-04-12)

@@ -104,7 +104,8 @@ class DefaultView(NeerslagRadarView):
         request.session[
             'make_sure_session_is_initialized'] = 'hurray'
         # End of the hack.
-
+        if request.session.session_key is None:
+            request.session.save()
         workspace_edit = WorkspaceEdit.get_or_create(
             request.session.session_key, request.user)
 
