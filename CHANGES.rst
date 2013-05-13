@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.19 (unreleased)
+0.19 (2013-05-13)
 -----------------
 
 - Fix for error 500 when visiting the site for the first time: session key not
