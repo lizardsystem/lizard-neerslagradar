@@ -115,27 +115,8 @@ class DefaultView(NeerslagRadarView):
         else:
             layer_json = json.dumps({})
 
-        stn_json = '{"slug": "grondstations",\
-                     "filter": "KNMI_STN", "parameter": "WNS1400.1d"}'
-
-        aws_json = '{"slug": "grondstations",\
-                     "filter": "KNMI_AWS", "parameter": "WNS1400.1h"}'
-
-        grondstation_json = '{"cql_filters": ["AFKORTING", "COMPLEET", "EXT_ID", "FREQUENTIE", "ID", "INSTANTIE", "KWALITEIT_", "NAAM", "OMSCHRIJVI", "PARENTID", "REGIO", "RESOLUTIE", "TYPE", "TYPE_DATA", "VERBINDING", "WNS1400_15", "WNS1400_1D", "WNS1400_1H", "X", "Y"], "name": "grondstations", "url": "http://geoserver6.lizard.net/geoserver/regenradar/wms", "wms_source_id": 18, "legend_url": "http://geoserver6.lizard.net:80/geoserver/regenradar/wms?request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=grondstations", "params": "{\"styles\": \"\", \"width\": \"256\", \"tiled\": \"true\", \"format\": \"image/png\", \"transparent\": \"true\", \"layers\": \"grondstations\", \"height\": \"256\"}", "options": "{\"buffer\": 0, \"isBaseLayer\": false, \"opacity\": 0.5}"}"'
-
         workspace_edit.add_workspace_item(
             "Neerslagradar", "adapter_neerslagradar", layer_json)
-
-        workspace_edit.add_workspace_item(
-            "Neerslag [mm/dag] (KNMI stn, grondstations)",
-            "adapter_fewsjdbc", stn_json)
-
-        workspace_edit.add_workspace_item(
-            "Neerslag [mm/dag] (KNMI aws, grondstations)",
-            "adapter_fewsjdbc", aws_json)
-
-        workspace_edit.add_workspace_item(
-            "grondstations", "wms", grondstation_json)
 
         return super(DefaultView, self).dispatch(request, *args, **kwargs)
 
