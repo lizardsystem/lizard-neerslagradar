@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.21 (unreleased)
+0.21 (2013-08-09)
 -----------------
 
 - Get rid of progressbar when finished loading
