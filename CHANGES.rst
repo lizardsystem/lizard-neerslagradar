@@ -6,6 +6,7 @@ Changelog of lizard-neerslagradar
 -----------------
 
 - Added fews KNMI groundstation layers to default workspace
+- Animation remebers state on zoom in or out (doesn't restart when stopped)
 
 
 0.19 (2013-05-13)
