@@ -2,7 +2,7 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-0.20 (unreleased)
+0.20 (2013-08-09)
 -----------------
 
 - Added fews KNMI groundstation layers to default workspace
