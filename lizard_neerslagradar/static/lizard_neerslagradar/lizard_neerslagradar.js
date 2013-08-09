@@ -337,7 +337,7 @@
     function on_layer_loading_change () {
         if (layers_loading > 0) {
             // 'if' control structure split for clarity
-            if (progress_interval === null) {
+            if (progress_interval === null && is_running()) {
                 set_progress(0);
                 progress_interval = setInterval(update_progress, 300);
             }
@@ -408,6 +408,8 @@
                 clearInterval(wait_interval);
             }
         };
+        set_progress(0);
+        progress_interval = setInterval(update_progress, 300);
         wait_interval = setInterval(tick, 1000);
     }
 
