@@ -382,7 +382,8 @@
 
         var is_ready = ratio == 1;
         if (is_ready) {
-            $progressbar.addClass('progress-success').removeClass('active').removeClass('progress-striped');
+            //$progressbar.addClass('progress-success').removeClass('active').removeClass('progress-striped');
+            $progressbar.toggle();
             $btn.removeAttr('disabled');
             $slider.slider('enable');
             if (!$btn.hasClass('active')) {
@@ -391,7 +392,7 @@
 
         }
         else {
-            $progressbar.removeClass('progress-success').addClass('active').addClass('progress-striped');
+            $progressbar.toggle();
             $btn.attr('disabled', 'disabled');
             $slider.slider('disable');
         }
