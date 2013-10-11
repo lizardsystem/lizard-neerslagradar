@@ -131,6 +131,7 @@
     var cycle_layers_interval = null;
     var current_layer_idx = -1;
     var paused_at_end = false;
+    var is_first_load = true;
 
     var layers = [];
     var regional_layers = [];
@@ -288,6 +289,13 @@
         });
     }
 
+    function start_if_first_load () {
+        if (is_first_load) {
+            start();
+            is_first_load = false;
+        }
+    }
+
     function start () {
         $btn.find('i').removeClass('icon-play').addClass('icon-pause');
         $btn.addClass('active');
@@ -386,10 +394,7 @@
             $progressbar.toggle();
             $btn.removeAttr('disabled');
             $slider.slider('enable');
-            if (!$btn.hasClass('active')) {
-              start();
-            }
-
+            start_if_first_load();
         }
         else {
             $progressbar.toggle();
