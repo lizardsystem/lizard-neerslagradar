@@ -206,13 +206,11 @@
             // figure out next layer
             var next_layer_idx = (current_layer_idx >= layers.length - 1) ? 0 : current_layer_idx + 1;
             if (next_layer_idx === 0) {
-              paused_at_end = true;
-              window.setTimeout(function(){
-                paused_at_end = false;
-                set_layer(0);
-              }, 1000);
-            } else {
-              set_layer(next_layer_idx);
+                paused_at_end = true;
+                window.setTimeout(function () { paused_at_end = false; }, 1000);
+            }
+            else {
+                set_layer(next_layer_idx);
             }
         }
     }
@@ -345,7 +343,7 @@
     function on_layer_loading_change () {
         if (layers_loading > 0) {
             // 'if' control structure split for clarity
-            if (progress_interval === null && is_running()) {
+            if (progress_interval === null) {
                 set_progress(0);
                 progress_interval = setInterval(update_progress, 300);
             }
@@ -390,14 +388,15 @@
 
         var is_ready = ratio == 1;
         if (is_ready) {
-            //$progressbar.addClass('progress-success').removeClass('active').removeClass('progress-striped');
-            $progressbar.toggle();
+            $progressbar.addClass('progress-success').removeClass('active');
+            $progressbar.hide();
             $btn.removeAttr('disabled');
             $slider.slider('enable');
             start_if_first_load();
         }
         else {
-            $progressbar.toggle();
+            $progressbar.removeClass('progress-success').addClass('active');
+            $progressbar.show();
             $btn.attr('disabled', 'disabled');
             $slider.slider('disable');
         }
@@ -414,8 +413,6 @@
                 clearInterval(wait_interval);
             }
         };
-        set_progress(0);
-        progress_interval = setInterval(update_progress, 300);
         wait_interval = setInterval(tick, 1000);
     }
 
