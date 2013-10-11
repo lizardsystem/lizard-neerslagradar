@@ -207,7 +207,7 @@
             var next_layer_idx = (current_layer_idx >= layers.length - 1) ? 0 : current_layer_idx + 1;
             if (next_layer_idx === 0) {
                 paused_at_end = true;
-                window.setTimeout(function () { paused_at_end = false; }, 1000);
+                setTimeout(function () { paused_at_end = false; set_layer(0); }, 1000);
             }
             else {
                 set_layer(next_layer_idx);
