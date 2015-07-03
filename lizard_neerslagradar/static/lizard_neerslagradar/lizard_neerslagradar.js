@@ -131,7 +131,6 @@
     var cycle_layers_interval = null;
     var current_layer_idx = -1;
     var paused_at_end = false;
-    var is_first_load = true;
 
     var layers = [];
     var regional_layers = [];
@@ -139,15 +138,11 @@
     var full_bbox = new OpenLayers.Bounds(
         lizard_neerslagradar.fixed_image_layer_bbox.split(','));
 
-    var regional_bbox;
-    if (lizard_neerslagradar.user_logged_in) {
-        regional_bbox = new OpenLayers.Bounds(
-            lizard_neerslagradar.region_bbox.split(','));
-    }
+    var regional_bbox = full_bbox;
+    // TODO: USER LOGGED IN AANPASSEN
 
     for (var i=0; i < lizard_neerslagradar.animation_datetimes.length; i++) {
-        var dt = moment.utc(lizard_neerslagradar.animation_datetimes[i].datetime);
-
+        var dt = moment(lizard_neerslagradar.animation_datetimes[i].datetime);
         if (lizard_neerslagradar.user_logged_in) {
             layers.push(new MyLayer(dt, 0.2, full_bbox));
             regional_layers.push(new MyLayer(dt, 0.6, regional_bbox));
@@ -206,24 +201,35 @@
             // figure out next layer
             var next_layer_idx = (current_layer_idx >= layers.length - 1) ? 0 : current_layer_idx + 1;
             if (next_layer_idx === 0) {
-                paused_at_end = true;
-                setTimeout(function () { paused_at_end = false; set_layer(0); }, 1000);
-            }
-            else {
-                set_layer(next_layer_idx);
+              paused_at_end = true;
+              window.setTimeout(function(){
+                paused_at_end = false;
+                set_layer(0);
+              }, 1000);
+            } else {
+              set_layer(next_layer_idx);
             }
         }
     }
 
     function init_cycle_layers () {
         var init_layer = function (idx, layer) {
-            var dt_iso_8601 = layer.dt.format('YYYY-MM-DDTHH:mm:ss') + '.000Z';
+            var dt_iso_8601 = moment.utc(layer.dt).format('YYYY-MM-DDTHH:mm:ss');
             var wms_params = {
-                WIDTH: 525,
+                SERVICE: 'WMS',
+                REQUEST: 'GetMap',
+                VERSION: '1.1.1',
+                LAYERS: 'radar/5min',
+                STYLES: 'radar-5min',
+                FORMAT: 'image/png',
+                TRANSPARENT: false,
                 HEIGHT: 497,
+                WIDTH: 525,
+                INDEX: 101,
+                TIME: dt_iso_8601,
+                ZINDEX: 20,
                 SRS: 'EPSG:3857',
                 BBOX: layer.bbox.toBBOX(),
-                TIME: dt_iso_8601
             };
             var wms_url = lizard_neerslagradar.wms_base_url + '?' + $.param(wms_params);
             var ol_layer = new CssHideableImageLayer(
@@ -343,7 +349,7 @@
     function on_layer_loading_change () {
         if (layers_loading > 0) {
             // 'if' control structure split for clarity
-            if (progress_interval === null) {
+            if (progress_interval === null && is_running()) {
                 set_progress(0);
                 progress_interval = setInterval(update_progress, 300);
             }
@@ -446,6 +452,9 @@
 
     function init_neerslagradar () {
         // init_overview();
+        var dt_start = moment.utc().subtract('hours', 3);
+        var dt_end = moment.utc().add('hours', 3);
+        set_view_state({dt_start: dt_start, dt_end: dt_end});
         init_button();
         init_slider();
         init_progress();
