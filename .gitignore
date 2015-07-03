@@ -12,7 +12,9 @@ parts/
 build/
 var/
 *.egg-info
-
+*.pyo
 *.pyc
 
 test.db
+
+eggs
