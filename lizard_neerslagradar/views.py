@@ -36,7 +36,7 @@ TIFF_BBOX = ', '.join([
     '7224238.809'  # Top, maxy
 ])
 
-ANIMATION_STEP = 15  # Minutes
+ANIMATION_STEP = 5  # Minutes
 ANIMATION_HOURS = 3
 FORECAST_DURATION = 3
 
