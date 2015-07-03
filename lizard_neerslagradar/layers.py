@@ -311,11 +311,6 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         start_date_utc = dates.to_utc(start_date)
         end_date_utc = dates.to_utc(end_date)
 
-        td_windows = [datetime.timedelta(days=2),
-                      datetime.timedelta(days=1),
-                      datetime.timedelta(hours=3),
-                      datetime.timedelta(hours=1)]
-
         info = []
 
         symbol_url = self.symbol_url()
@@ -329,17 +324,6 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
 
             values = self.values(identifier, start_date_utc, end_date_utc)
 
-            area_km2 = 1.0  # A defining feature of the Neerslagradar
-                            # is that we always work in a 1km x 1km
-                            # grid.
-
-            period_summary_row = {
-                'max': sum(v['value'] for v in values),
-                'start': start_date,
-                'end': end_date,
-                'delta': (end_date - start_date).days,
-                't': t_to_string(None),
-            }
             infoname = self._grid_name(
                 identifier['region_name'], identifier['identifier'])
 
@@ -349,13 +333,6 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
                 'shortname': infoname,
                 'name': infoname,
                 'location': infoname,
-                'period_summary_row': period_summary_row,
-                'table': [rain_stats(values,
-                                     area_km2,
-                                     td_window,
-                                     start_date_utc,
-                                     end_date_utc)
-                          for td_window in td_windows],
                 'image_graph_url': image_graph_url,
                 'flot_graph_data_url': flot_graph_data_url,
                 'url': self.workspace_mixin_item.url(
