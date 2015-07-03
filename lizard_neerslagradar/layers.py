@@ -10,6 +10,8 @@ graph pops up."""
 
 import datetime
 import logging
+import urllib2
+import json
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
@@ -37,11 +39,8 @@ from lizard_neerslagradar import models
 from lizard_neerslagradar import projections
 
 
-# Hardcoded constants for the legend.
-MAX_RAIN = 2
-LEGEND_COLORS_NAME = 'jet'
-THRESHOLD = 0.08
-MM_PER_HOUR_VALUES = [1, 2, 5, 10, 20, 50]
+# Hardcoded nodatavalue for precipitation
+NODATAVALUE = -9999
 
 logger = logging.getLogger(__name__)
 
@@ -102,17 +101,18 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         name = self._grid_name(region.name, pixel)
 
         return [{
-                'distance': 0,
-                'name': name,
-                'shortname': name,
-                'workspace_item': self.workspace_item,
-                'identifier': {
-                    'identifier': pixel,
-                    'region_name': region.name
-                    },
+            'distance': 0,
+            'name': name,
+            'shortname': name,
+            'workspace_item': self.workspace_item,
+            'identifier': {
+                'identifier': pixel,
+                'region_name': region.name,
                 'google_coords': (google_x, google_y),
-                'object': None
-                }]
+            },
+            'google_coords': (google_x, google_y),
+            'object': None
+        }]
 
     def layer(self, layer_ids=None, webcolor=None, request=None):
         """Draw the user's region(s)."""
@@ -167,7 +167,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         return {
             'name': name,
             'identifier': identifier,
-            }
+        }
 
     def image(self, identifiers=None, start_date=None, end_date=None,
               width=None, height=None, layout_extra=None):
@@ -253,15 +253,44 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         return graph.render()
 
     def values(self, identifier, start_date, end_date):
-        cell_x, cell_y = identifier['identifier']
-        #end_date = dates.to_utc(datetime.datetime.utcnow())
-        #start_date = end_date - datetime.timedelta(hours=1)
-        values = openradar.products.get_values_from_opendap(
-            x=cell_x,
-            y=cell_y,
-            start_date=start_date,
-            end_date=end_date)
+        # get coordinates for rasterstorequery
+        cell_x, cell_y = identifier['google_coords']
+        # transform datetimes for rasterstorequery
+        format_ = "%Y-%m-%dT%H:%M:%SZ"
+        end_date_str = datetime.datetime.strftime(end_date, format_)
+        start_date_str = datetime.datetime.strftime(start_date, format_)
+        # rasterstore query
+        url_template = ('https://raster.lizard.net/data?request=getdata&geom='
+               'POINT({x}+{y})&layer=radar:5min&sr=EPSG:3857&start={start}&'
+               'stop={stop}&time=1&indent=2')
+        url = url_template.format(x=cell_x, y=cell_y, start=start_date_str,
+                   stop=end_date_str)
+        url_file = urllib2.urlopen(url)
+        rasterstore_values = json.load(url_file)
+
+        # transform rasterstore values into required datastructure with dicts
+        # in some cases rasterstore contains None values, these are set to 0
+        rain_data = rasterstore_values['values']#[val if val else "" for val in rasterstore_values['values']]
+        rain_datetimes = rasterstore_values['time']
+        values = [self._rain_dict(rain_datetimes[i], val) if val else
+                  self._rain_dict(rain_datetimes[i], 0)  for i, val in
+                  enumerate(rain_data)]
         return values
+
+    def _rain_dict(self, time, value, unit=u"mm/5min"):
+        """
+        Return dictionary for each datapoint with datetime, value and unit
+        information.
+
+        time is a string of the format 2015-01-10T01:01:00
+        """
+        dtformat= '%Y-%m-%dT%H:%M:%S'
+        dt = pytz.timezone('Europe/Amsterdam')\
+                 .localize(datetime.datetime.strptime(time, dtformat))\
+                 .astimezone(pytz.utc)
+        rainvalue = {'value': value, 'unit': unit,
+                     'datetime': dt}
+        return rainvalue
 
     def html(self, identifiers=None, layout_options=None):
         """
@@ -361,8 +390,8 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
                                'mask': ('empty_mask.png', ),
                                'color': (1, 1, 1, 1)}
         functions = openradar.utils.rain_kwargs(max_rain=MAX_RAIN,
-                                                 name=LEGEND_COLORS_NAME,
-                                                 threshold=THRESHOLD)
+                                                name=LEGEND_COLORS_NAME,
+                                                threshold=THRESHOLD)
         normalize = functions['normalize']
         colormap = functions['colormap']
         mm_per_5min_values = [value / 12.0 for value in MM_PER_HOUR_VALUES]
@@ -381,5 +410,5 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
                     'color': (r, g, b)})
             img_url = self.symbol_url(icon_style=icon_style)
             result.append({'img_url': img_url,
-                                  'description': description})
+                           'description': description})
         return result
