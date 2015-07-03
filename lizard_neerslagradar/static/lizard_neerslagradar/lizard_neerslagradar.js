@@ -448,6 +448,12 @@
         map.addControl(mouse_position);
     }
 
+    function addPoweredBy(){
+    var powered_by = '<p class="neerslagradar_poweredby">Powered by:  ' +
+                     'Royal Haskoning DHV  |  Nelen & Schuurmans</p>'
+    $("#footer").prepend(powered_by)
+    }
+
     function init_neerslagradar () {
         // init_overview();
         var dt_start = moment.utc().subtract('hours', 3);
@@ -458,6 +464,7 @@
         init_progress();
         init_cycle_layers();
         wait_until_first_layer_loaded();
+        addPoweredBy();
     }
 
     $(document).ready(init_neerslagradar);
