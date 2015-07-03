@@ -293,13 +293,6 @@
         });
     }
 
-    function start_if_first_load () {
-        if (is_first_load) {
-            start();
-            is_first_load = false;
-        }
-    }
-
     function start () {
         $btn.find('i').removeClass('icon-play').addClass('icon-pause');
         $btn.addClass('active');
@@ -394,15 +387,18 @@
 
         var is_ready = ratio == 1;
         if (is_ready) {
-            $progressbar.addClass('progress-success').removeClass('active');
-            $progressbar.hide();
+            //$progressbar.addClass('progress-success').removeClass('active').removeClass('progress-striped');
+            $progressbar.toggle();
             $btn.removeAttr('disabled');
             $slider.slider('enable');
-            start_if_first_load();
+            if (!$btn.hasClass('active')) {
+              start();
+            }
+            $progressbar.hide();
+
         }
         else {
-            $progressbar.removeClass('progress-success').addClass('active');
-            $progressbar.show();
+            $progressbar.toggle();
             $btn.attr('disabled', 'disabled');
             $slider.slider('disable');
         }
@@ -419,6 +415,8 @@
                 clearInterval(wait_interval);
             }
         };
+        set_progress(0);
+        progress_interval = setInterval(update_progress, 300);
         wait_interval = setInterval(tick, 1000);
     }
 
