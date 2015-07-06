@@ -99,7 +99,6 @@
                 this.staticMap = options.staticMap;
             }
         },
-
         updateOverview: function() {
             var mapRes = this.map.getResolution();
             var targetRes = this.ovmap.getResolution();
@@ -453,7 +452,19 @@
                      'Royal Haskoning DHV  |  Nelen & Schuurmans</p>'
     $("#footer").prepend(powered_by)
     }
-
+    function show_map(position) {
+        var latitude = position.coords.latitude;
+        var longitude = position.coords.longitude;
+        var latitude = position.coords.latitude;
+        var longitude = position.coords.longitude;
+        var lonlat = OpenLayers.LonLat(longitude, latitude);
+        map.setCenter(lonlat, 11);
+    }
+    function zoomToGeolocation() {
+        if (Modernizr.geolocation) {
+            navigator.geolocation.getCurrentPosition(show_map);
+        }
+    }
     function init_neerslagradar () {
         // init_overview();
         var dt_start = moment.utc().subtract('hours', 3);
@@ -465,6 +476,7 @@
         init_cycle_layers();
         wait_until_first_layer_loaded();
         addPoweredBy();
+        zoomToGeolocation();
     }
 
     $(document).ready(init_neerslagradar);
