@@ -1,7 +1,133 @@
 // jslint configuration; btw: don't put a space before 'jslint' below.
 /*jslint browser: true */
 /*global $, OpenLayers, window, map, lizard_neerslagradar */
+function setup_movable_dialog() {
+    // used by open_popup
+    $('body').append('<div id="movable-dialog"><div id="movable-dialog-content"></div></div>');
+    var options = {
+        autoOpen: false,
+        title: '',
+        width: 600,
+        height: 250,
+        zIndex: 10000,
+        close: function (event, ui) {
+            // clear contents on close
+            $('#movable-dialog-content').empty();
+        }
+    };
 
+    // make an exception for iPad
+    if (isAppleMobile) {
+        // dragging on touchscreens isn't practical
+        options.draggable = false;
+        // resizing neither
+        options.resizable = false;
+        // make width 90% of the entire window
+        options.width = $(window).width() * 0.9;
+        // make height 80% of the entire window
+        options.height = $(window).height() * 0.8;
+    }
+
+    $('#movable-dialog').dialog(options);
+}
+function flotGraphLoadData($container, response) {
+    var data = response.data;
+    if (data.length === 0) {
+        $container.html('Geen gegevens beschikbaar.');
+        return;
+    }
+    var defaultOpts = {
+        series: {
+            points: { show: true, hoverable: true, radius: 1 },
+            shadowSize: 0
+        },
+        yaxis: {
+            zoomRange: [false, false],
+            panRange: false
+        },
+        xaxis: {
+            mode: "time",
+            zoomRange: [1 * MS_MINUTE, 400 * MS_YEAR]
+        },
+        grid: { hoverable: true, labelMargin: 15 },
+        pan: { interactive: false },
+        zoom: { interactive: false }
+    };
+    if (isAppleMobile) {
+        // enable touch
+        defaultOpts.touch = { pan: 'xy', scale: 'x', autoWidth: false, autoHeight: false };
+        // disable flot.navigate pan & zoom
+        defaultOpts.pan.interactive = false;
+        defaultOpts.zoom.interactive = false;
+    }
+
+    // set up elements nested in our assigned parent div
+    $container.css('position', 'relative');
+    // first row
+    var $graph_row = $('<div class="flot-graph-row" />')
+        .css({
+            position: 'absolute',
+            left: 0, top: 0, bottom: 48, right: 0
+        });
+    var $y_label_text_wrapper = $('<div/>')
+        .css({
+            position: 'absolute',
+            bottom: 80,
+            width: 20
+        });
+    var $y_label_text = $('<div class="flot-graph-y-label-text" />')
+        .css({
+            'white-space': 'nowrap',
+            'background-color': '#fff'
+        })
+        .transform({rotate: '-90deg'})
+        .html(response.y_label);
+    $y_label_text_wrapper.append($y_label_text);
+    var $y_label = $('<span class="flot-graph-y-label" />')
+        .css({
+            position: 'absolute',
+            left: 0, top: 0, bottom: 0, width: 20
+        });
+    $y_label.append($y_label_text_wrapper);
+    $graph_row.append($y_label);
+    var $graph = $('<span class="flot-graph-canvas" />')
+        .css({
+            position: 'absolute',
+            left: 20, top: 0, bottom: 0, right: 0
+        });
+    $graph_row.append($graph);
+    $container.append($graph_row);
+
+    // initial plot
+    var plot = $.plot($graph, data, defaultOpts);
+    bindPanZoomEvents($graph);
+
+    if (!isAppleMobile) {
+        function showGraphTooltip(x, y, datapoint) {
+            var formatted = moment.utc(datapoint[0]).format('LL h:mm');
+            $('<div id="graphtooltip">' + formatted + ': '+ datapoint[1] + '</div>').css({
+                'position': 'absolute',
+                'top': y - 25,
+                'left': x + 5,
+                'padding': '0.4em 0.6em',
+                'border-radius': '0.5em',
+                'border': '1px solid #111',
+                'background-color': '#fff',
+                'z-index': 11000
+            }).appendTo("body");
+        }
+
+        $graph.bind("plothover", function (event, pos, item) {
+            if (item) {
+                $("#graphtooltip").remove();
+                showGraphTooltip(item.pageX, item.pageY, item.datapoint);
+            } else {
+                $("#graphtooltip").remove();
+            }
+        });
+    }
+    return plot;
+}
 (function () {
     function MyLayer (dt, opacity, bbox) {
         this.dt = dt;
