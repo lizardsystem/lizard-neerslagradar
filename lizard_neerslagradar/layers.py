@@ -270,11 +270,10 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
 
         # transform rasterstore values into required datastructure with dicts
         # in some cases rasterstore contains None values, these are set to 0
-        rain_data = rasterstore_values['values']#[val if val else "" for val in rasterstore_values['values']]
+        rain_data = rasterstore_values['values']
         rain_datetimes = rasterstore_values['time']
-        values = [self._rain_dict(rain_datetimes[i], val) if val else
-                  self._rain_dict(rain_datetimes[i], 0)  for i, val in
-                  enumerate(rain_data)]
+        values = [self._rain_dict(rain_datetimes[i], val if val else 0)
+                  for i, val in enumerate(rain_data)]
         return values
 
     def _rain_dict(self, time, value, unit=u"mm/5min"):
@@ -286,8 +285,7 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
         """
         dtformat= '%Y-%m-%dT%H:%M:%S'
         dt = pytz.timezone('Europe/Amsterdam')\
-                 .localize(datetime.datetime.strptime(time, dtformat))\
-                 .astimezone(pytz.utc)
+                 .localize(datetime.datetime.strptime(time, dtformat))
         rainvalue = {'value': value, 'unit': unit,
                      'datetime': dt}
         return rainvalue
