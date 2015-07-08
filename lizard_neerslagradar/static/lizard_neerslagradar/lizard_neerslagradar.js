@@ -272,7 +272,12 @@ function flotGraphLoadData($container, response) {
 
     for (var i=0; i < lizard_neerslagradar.animation_datetimes.length; i++) {
         var dt = moment(lizard_neerslagradar.animation_datetimes[i].datetime);
-        layers.push(new MyLayer(dt, 0.6, full_bbox));
+        if (lizard_neerslagradar.user_logged_in) {
+            layers.push(new MyLayer(dt, 0.2, full_bbox));
+            regional_layers.push(new MyLayer(dt, 0.6, regional_bbox));
+        } else {
+            layers.push(new MyLayer(dt, 0.6, full_bbox));
+        }
     }
 
     var layers_loading = 0;
@@ -287,10 +292,20 @@ function flotGraphLoadData($container, response) {
             if (current_layer_idx != -1) {
                 var current_layer = layers[current_layer_idx];
                 current_layer.ol_layer.setCssVisibility(false);
+                if (lizard_neerslagradar.user_logged_in) {
+                    current_layer = regional_layers[current_layer_idx];
+                    current_layer.ol_layer.setCssVisibility(false);
+                }
             }
             if (layer_idx != -1) {
                 var layer = layers[layer_idx];
                 layer.ol_layer.setCssVisibility(true);
+                if (lizard_neerslagradar.user_logged_in) {
+                    layer = regional_layers[layer_idx];
+                    if (layer && layer.ol_layer) {
+                        layer.ol_layer.setCssVisibility(true);
+                    }
+                }
             }
 
             // update with next layer index
@@ -303,10 +318,14 @@ function flotGraphLoadData($container, response) {
     function cycle_layers () {
         var current_layer = layers[current_layer_idx];
         var regional_layer;
+        if (lizard_neerslagradar.user_logged_in) {
+            regional_layer = regional_layers[current_layer_idx];
+        }
         // don't swap layers when we're still loading
         if ((!current_layer || !current_layer.ol_layer.loading) &&
             (!paused_at_end) &&
-            (!regional_layer ||
+            (!lizard_neerslagradar.user_logged_in ||
+             !regional_layer ||
              !regional_layer.ol_layer.loading)) {
             // figure out next layer
             var next_layer_idx = (current_layer_idx >= layers.length - 1) ?
@@ -376,6 +395,11 @@ function flotGraphLoadData($container, response) {
             map.addLayer(ol_layer);
             layer.ol_layer = ol_layer;
         };
+
+        $.each(layers, init_layer);
+        if (lizard_neerslagradar.user_logged_in) {
+            $.each(regional_layers, init_layer);
+        }
     }
 
     function on_layer_changed () {
