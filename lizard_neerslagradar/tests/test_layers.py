@@ -37,8 +37,11 @@ class TestGetGraphValues(TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestCase, self).__init__(*args, **kwargs)
-        self.identifier = {u'identifier': [224, 241], u'region_name': u'Bodegraven',
-                      u'google_coords': [534142.28021942, 6821392.8476399]}
+        self.identifier = {
+            u'identifier': [224, 241],
+            u'region_name': u'Bodegraven',
+            u'google_coords': [534142.28021942, 6821392.8476399]
+        }
         self.start = self._transform_UTC(datetime.datetime(2015, 6, 17, 7, 24, 36))
         self.end = self._transform_UTC(datetime.datetime(2015, 6, 19, 7, 24, 36))
         self.values = layers.NeerslagRadarAdapter.values(

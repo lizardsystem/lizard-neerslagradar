@@ -3,7 +3,8 @@
 /*global $, OpenLayers, window, map, lizard_neerslagradar */
 function setup_movable_dialog() {
     // used by open_popup
-    $('body').append('<div id="movable-dialog"><div id="movable-dialog-content"></div></div>');
+    $('body').append('<div id="movable-dialog"><div ' +
+                     'id="movable-dialog-content"></div></div>');
     var options = {
         autoOpen: false,
         title: '',
@@ -27,7 +28,6 @@ function setup_movable_dialog() {
         // make height 80% of the entire window
         options.height = $(window).height() * 0.8;
     }
-
     $('#movable-dialog').dialog(options);
 }
 function flotGraphLoadData($container, response) {
@@ -55,7 +55,8 @@ function flotGraphLoadData($container, response) {
     };
     if (isAppleMobile) {
         // enable touch
-        defaultOpts.touch = { pan: 'xy', scale: 'x', autoWidth: false, autoHeight: false };
+        defaultOpts.touch = { pan: 'xy', scale: 'x', autoWidth: false,
+            autoHeight: false };
         // disable flot.navigate pan & zoom
         defaultOpts.pan.interactive = false;
         defaultOpts.zoom.interactive = false;
@@ -105,15 +106,16 @@ function flotGraphLoadData($container, response) {
     if (!isAppleMobile) {
         function showGraphTooltip(x, y, datapoint) {
             var formatted = moment.utc(datapoint[0]).format('LL h:mm');
-            $('<div id="graphtooltip">' + formatted + ': '+ datapoint[1] + '</div>').css({
-                'position': 'absolute',
-                'top': y - 25,
-                'left': x + 5,
-                'padding': '0.4em 0.6em',
-                'border-radius': '0.5em',
-                'border': '1px solid #111',
-                'background-color': '#fff',
-                'z-index': 11000
+            $('<div id="graphtooltip">' + formatted + ': '+ datapoint[1] +
+                '</div>').css({
+                    'position': 'absolute',
+                    'top': y - 25,
+                    'left': x + 5,
+                    'padding': '0.4em 0.6em',
+                    'border-radius': '0.5em',
+                    'border': '1px solid #111',
+                    'background-color': '#fff',
+                    'z-index': 11000
             }).appendTo("body");
         }
 
@@ -142,8 +144,9 @@ function flotGraphLoadData($container, response) {
         initialize: function (name, url, params, options) {
             OpenLayers.Layer.WMS.prototype.initialize.apply(
                 this, [name, url, params, options]);
-            if (options.cssVisibility === true || options.cssVisibility === false) {
-                this.cssVisibility = options.cssVisibility;
+            if (options.cssVisibility === true ||
+                options.cssVisibility === false) {
+                    this.cssVisibility = options.cssVisibility;
             }
             this.events.on({
                 'added': this.updateCssVisibility,
@@ -182,7 +185,8 @@ function flotGraphLoadData($container, response) {
         initialize: function (name, url, extent, size, options) {
             OpenLayers.Layer.Image.prototype.initialize.apply(
                 this, [name, url, extent, size, options]);
-            if (options.cssVisibility === true || options.cssVisibility === false) {
+            if (options.cssVisibility === true || options.cssVisibility ===
+                false) {
                 this.cssVisibility = options.cssVisibility;
             }
             this.events.on({
@@ -220,7 +224,8 @@ function flotGraphLoadData($container, response) {
         staticMap: true,
 
         initialize: function (options) {
-            OpenLayers.Control.OverviewMap.prototype.initialize.apply(this, [options]);
+            OpenLayers.Control.OverviewMap.prototype.initialize.apply(this,
+                [options]);
             if (options.staticMap === true || options.staticMap === false) {
                 this.staticMap = options.staticMap;
             }
@@ -238,7 +243,7 @@ function flotGraphLoadData($container, response) {
             }
             if (!this.staticMap) {
                 var center;
-                if (this.ovmap.getProjection() != this.map.getProjection()) {
+                if (this.ovmap.getProjection() !== this.map.getProjection()) {
                     center = this.map.center.clone();
                     center.transform(this.map.getProjectionObject(),
                                      this.ovmap.getProjectionObject() );
@@ -264,16 +269,10 @@ function flotGraphLoadData($container, response) {
         lizard_neerslagradar.fixed_image_layer_bbox.split(','));
 
     var regional_bbox = full_bbox;
-    // TODO: USER LOGGED IN AANPASSEN
 
     for (var i=0; i < lizard_neerslagradar.animation_datetimes.length; i++) {
         var dt = moment(lizard_neerslagradar.animation_datetimes[i].datetime);
-        if (lizard_neerslagradar.user_logged_in) {
-            layers.push(new MyLayer(dt, 0.2, full_bbox));
-            regional_layers.push(new MyLayer(dt, 0.6, regional_bbox));
-        } else {
-            layers.push(new MyLayer(dt, 0.6, full_bbox));
-        }
+        layers.push(new MyLayer(dt, 0.6, full_bbox));
     }
 
     var layers_loading = 0;
@@ -288,20 +287,10 @@ function flotGraphLoadData($container, response) {
             if (current_layer_idx != -1) {
                 var current_layer = layers[current_layer_idx];
                 current_layer.ol_layer.setCssVisibility(false);
-                if (lizard_neerslagradar.user_logged_in) {
-                    current_layer = regional_layers[current_layer_idx];
-                    current_layer.ol_layer.setCssVisibility(false);
-                }
             }
             if (layer_idx != -1) {
                 var layer = layers[layer_idx];
                 layer.ol_layer.setCssVisibility(true);
-                if (lizard_neerslagradar.user_logged_in) {
-                    layer = regional_layers[layer_idx];
-                    if (layer && layer.ol_layer) {
-                        layer.ol_layer.setCssVisibility(true);
-                    }
-                }
             }
 
             // update with next layer index
@@ -314,17 +303,14 @@ function flotGraphLoadData($container, response) {
     function cycle_layers () {
         var current_layer = layers[current_layer_idx];
         var regional_layer;
-        if (lizard_neerslagradar.user_logged_in) {
-            regional_layer = regional_layers[current_layer_idx];
-        }
         // don't swap layers when we're still loading
         if ((!current_layer || !current_layer.ol_layer.loading) &&
             (!paused_at_end) &&
-            (!lizard_neerslagradar.user_logged_in ||
-             !regional_layer ||
+            (!regional_layer ||
              !regional_layer.ol_layer.loading)) {
             // figure out next layer
-            var next_layer_idx = (current_layer_idx >= layers.length - 1) ? 0 : current_layer_idx + 1;
+            var next_layer_idx = (current_layer_idx >= layers.length - 1) ?
+                0 : current_layer_idx + 1;
             if (next_layer_idx === 0) {
               paused_at_end = true;
               window.setTimeout(function(){
@@ -339,7 +325,8 @@ function flotGraphLoadData($container, response) {
 
     function init_cycle_layers () {
         var init_layer = function (idx, layer) {
-            var dt_iso_8601 = moment.utc(layer.dt).format('YYYY-MM-DDTHH:mm:ss');
+            var dt_iso_8601 = moment.utc(layer.dt)
+                .format('YYYY-MM-DDTHH:mm:ss');
             var wms_params = {
                 SERVICE: 'WMS',
                 REQUEST: 'GetMap',
@@ -354,9 +341,10 @@ function flotGraphLoadData($container, response) {
                 TIME: dt_iso_8601,
                 ZINDEX: 20,
                 SRS: 'EPSG:3857',
-                BBOX: layer.bbox.toBBOX(),
+                BBOX: layer.bbox.toBBOX()
             };
-            var wms_url = lizard_neerslagradar.wms_base_url + '?' + $.param(wms_params);
+            var wms_url = lizard_neerslagradar.wms_base_url + '?' +
+                $.param(wms_params);
             var ol_layer = new CssHideableImageLayer(
                 'L' + idx,
                 wms_url,
@@ -365,8 +353,10 @@ function flotGraphLoadData($container, response) {
                 {
                     isBaseLayer: false,
                     alwaysInRange: true,
-                    visibility: true, // keep this, so all layers are preloaded in the browser
-                    cssVisibility: false, // hide layer again with this custom option
+                    visibility: true, // keep this, so all layers are preloaded
+                                      // in the browser
+                    cssVisibility: false, // hide layer again with this custom
+                                          // option
                     displayInLayerSwitcher: false,
                     metadata: layer,
                     opacity: layer.opacity,
@@ -386,11 +376,6 @@ function flotGraphLoadData($container, response) {
             map.addLayer(ol_layer);
             layer.ol_layer = ol_layer;
         };
-
-        $.each(layers, init_layer);
-        if (lizard_neerslagradar.user_logged_in) {
-            $.each(regional_layers, init_layer);
-        }
     }
 
     function on_layer_changed () {
@@ -534,7 +519,8 @@ function flotGraphLoadData($container, response) {
     function wait_until_first_layer_loaded () {
         var wait_interval;
         var tick = function () {
-            if (layers[0] && layers[0].ol_layer && !layers[0].ol_layer.loading) {
+            if (layers[0] && layers[0].ol_layer &&
+                !layers[0].ol_layer.loading) {
                 set_layer(0);
                 // stop self
                 clearInterval(wait_interval);
@@ -560,7 +546,8 @@ function flotGraphLoadData($container, response) {
                     760954.7013451669, 7023311.813260503
                 ),
                 projection: 'EPSG:3857',
-                theme: null // KEEP THIS, to prevent OL from dynamically adding its CSS
+                theme: null // KEEP THIS, to prevent OL from dynamically adding
+                            // its CSS
             }
         };
         var overview_map = new StaticOverviewMap(overview_options);
@@ -575,12 +562,11 @@ function flotGraphLoadData($container, response) {
 
     function addPoweredBy(){
     var powered_by = '<p class="neerslagradar_poweredby">Powered by:  ' +
-                     'Royal Haskoning DHV  |  Nelen & Schuurmans</p>'
-    $("#footer").prepend(powered_by)
+                     '&nbspRoyal Haskoning DHV&nbsp  |  ' +
+                     '&nbspNelen & Schuurmans&nbsp</p>';
+    $("#footer").prepend(powered_by);
     }
     function show_map(position) {
-        var latitude = position.coords.latitude;
-        var longitude = position.coords.longitude;
         var latitude = position.coords.latitude;
         var longitude = position.coords.longitude;
         var lonlat = OpenLayers.LonLat(longitude, latitude);
@@ -604,6 +590,5 @@ function flotGraphLoadData($container, response) {
         addPoweredBy();
         zoomToGeolocation();
     }
-
     $(document).ready(init_neerslagradar);
 })();

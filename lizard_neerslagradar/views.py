@@ -86,7 +86,7 @@ def animation_datetimes(hours_before_now):
         minute=(start.minute // ANIMATION_STEP) * ANIMATION_STEP,
         tzinfo=start.tzinfo)
 
-    while current < today + forecast:
+    while current <= today + forecast:
         if current >= start:
             # Rounding may have put 'current' before the
             # ``hours_before_now``-hour boundary.
