@@ -12,6 +12,7 @@
         href="{{ STATIC_URL }}lizard_neerslagradar/lizard_neerslagradar.css"
         type="text/css"
         media="screen, projection" />
+  <link href="{{ STATIC_URL }}bootstrap/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" />
 {% endblock css %}
 
 {% block map-javascript %}
@@ -26,18 +27,20 @@
 
     var lizard_neerslagradar = lizard_neerslagradar || {};
 
-    lizard_neerslagradar.wms_base_url = '{% url lizard_neerslagradar.wms %}';
+    lizard_neerslagradar.wms_base_url = 'https://raster.lizard.net/wms';
     lizard_neerslagradar.fixed_image_layer_bbox = '{{ view.bbox }}';
 
-    lizard_neerslagradar.user_logged_in = {% if view.user_logged_in %}true{% else %}false{% endif %};
+    lizard_neerslagradar.user_logged_in = true;
     // Debug info: number of hours is {{ view.number_of_hours }}
     lizard_neerslagradar.animation_datetimes = {{ view.animation_datetimes|safe }};
-    {% if view.user_logged_in %}
-      lizard_neerslagradar.region_bbox = '{{ view.region_bbox }}';
-    {% endif %}
+    lizard_neerslagradar.region_bbox = '{{ view.region_bbox }}';
   </script>
   <script type="text/javascript"
-          src="{{ STATIC_URL }}lizard_neerslagradar/lizard_neerslagradar.js"></script>
+          src="{{ STATIC_URL }}lizard_neerslagradar/lizard_neerslagradar.js">
+  </script>
+  <script type="text/javascript"
+          src="{{ STATIC_URL }}modernizr/modernizr.custom.98213.js">
+  </script>
 {% endblock %}
 
 {% block breadcrumbs %}

@@ -1,6 +1,5 @@
 import datetime
 import logging
-import os
 
 from django.conf import settings
 from django.http import HttpResponse
@@ -37,9 +36,8 @@ TIFF_BBOX = ', '.join([
 ])
 
 ANIMATION_STEP = 5  # Minutes
-DEFAULT_ANIMATION_HOURS = 3
-LOGGED_IN_ANIMATION_HOURS = 24
-
+ANIMATION_HOURS = 3
+FORECAST_DURATION = 3
 
 def utc_now():
     return pytz.UTC.localize(datetime.datetime.utcnow())
@@ -76,6 +74,7 @@ def animation_datetimes(hours_before_now):
     today = utc_now()
     start = today - datetime.timedelta(hours=hours_before_now)
     step = datetime.timedelta(minutes=ANIMATION_STEP)
+    forecast = datetime.timedelta(hours=FORECAST_DURATION)
 
     # Round the minutes
     current = datetime.datetime(
@@ -86,7 +85,7 @@ def animation_datetimes(hours_before_now):
         minute=(start.minute // ANIMATION_STEP) * ANIMATION_STEP,
         tzinfo=start.tzinfo)
 
-    while current < today:
+    while current <= today + forecast:
         if current >= start:
             # Rounding may have put 'current' before the
             # ``hours_before_now``-hour boundary.
@@ -97,6 +96,7 @@ def animation_datetimes(hours_before_now):
 class DefaultView(NeerslagRadarView):
     template_name = 'lizard_neerslagradar/wms_neerslagradar.html'
     sidebar_is_collapsed = True
+    show_rightbar_title = None
 
     def dispatch(self, request, *args, **kwargs):
         """Add in the omnipresent workspace item, then proceed as normal."""
@@ -135,13 +135,6 @@ class DefaultView(NeerslagRadarView):
             logger.debug("BBOX: {0}".format(bbox))
             return bbox
 
-    @property
-    def number_of_hours(self):
-        """Return number of hours we want to show the animation for."""
-        if self.user_logged_in():
-            return LOGGED_IN_ANIMATION_HOURS
-        return DEFAULT_ANIMATION_HOURS
-
     def animation_datetimes(self):
         """For every date/time in the last 3 or 24 hours, we check if the data
         is available.  We need at least the "full" geotiff, and if the user is
@@ -152,19 +145,14 @@ class DefaultView(NeerslagRadarView):
         to load the whole animation."""
 
         data = []
-        for dt in animation_datetimes(self.number_of_hours):
-            p = netcdf.time_2_path(dt)
-            p = reproject.cache_path(
-                p, 'EPSG:3857', TIFF_BBOX.split(", "), 525, 497)
-            logger.debug("Checking path: {0}".format(p))
-            if os.path.exists(p):
-                data.append({
-                    # Translate the UTC datetime to the timezone
-                    # in Settings
-                    'datetime': (
-                        dt.astimezone(pytz.timezone(settings.TIME_ZONE)).
-                        strftime("%Y-%m-%dT%H:%M")),
-                })
+        for dt in animation_datetimes(ANIMATION_HOURS):
+            data.append({
+                # Translate the UTC datetime to the timezone
+                # in Settings
+                'datetime': (
+                    dt.astimezone(pytz.timezone(settings.TIME_ZONE)).
+                    strftime("%Y-%m-%dT%H:%M")),
+            })
         logger.debug("Data: {0}".format(data))
 
         return json.dumps(data)
