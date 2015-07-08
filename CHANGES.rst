@@ -11,7 +11,16 @@ Changelog of lizard-neerslagradar
 0.22 (2015-07-08)
 -----------------
 
-- Nothing changed yet.
+ - Added nearcasting.
+ - Removed Login. Changed WMS server for raindata to rasterstore.
+ - Changed progressbar.
+ - Added test to test GetGraphValues.
+ - Changed deprecated imports to new imports.
+ - Updated buildout to the lore of the current day.
+ - Removed code related to table from popup.
+ - Added 'Powered by' line to footer.
+ - Removed legend.
+ - Added geolocation to javascript.
 
 
 0.21 (2013-08-09)
