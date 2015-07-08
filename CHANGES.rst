@@ -11,7 +11,7 @@ Changelog of lizard-neerslagradar
 0.23 (2015-07-08)
 -----------------
 
--
+- Put code with logged-in check back in place in lizard-neerslagradar.js.
 
 
 0.22 (2015-07-08)
