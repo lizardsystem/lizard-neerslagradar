@@ -1,5 +1,7 @@
 #currentdt {
-    width: 5em;
+    width: 2em;
+    margin-right: 0;
+    padding-right: 0;
 }
 body{
     width: 100%;
@@ -9,6 +11,9 @@ header {
     right: 0px;
     width: 100%;
 }
+div#content-actions {
+    padding: 0 5px 0 5px;
+}
 div#progressbar {
     margin-top: 10px;
     margin-bottom: 0;
@@ -17,13 +22,12 @@ div#progressbar {
     margin-left: 18px;
     margin-right: 18px;
 }
-
 div#timeslider {
     height: 0.8em;
     margin-top: 14px;
-    width: 150px;
+    width: 117px;
     margin-left: 18px;
-    margin-right: 18px;
+    margin-right: 9px;
 }
 
 button#animate {
