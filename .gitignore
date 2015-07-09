@@ -18,3 +18,6 @@ var/
 test.db
 
 eggs
+.idea/
+.idea
+.idea/*
