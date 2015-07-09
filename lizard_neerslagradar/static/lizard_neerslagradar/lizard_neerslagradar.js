@@ -36,6 +36,8 @@ function flotGraphLoadData($container, response) {
         $container.html('Geen gegevens beschikbaar.');
         return;
     }
+    var dataset = data[0]['data']
+    var middle = dataset[parseInt(dataset.length/2)][0];
     var defaultOpts = {
         series: {
             points: { show: true, hoverable: true, radius: 1 },
@@ -49,9 +51,13 @@ function flotGraphLoadData($container, response) {
             mode: "time",
             zoomRange: [1 * MS_MINUTE, 400 * MS_YEAR]
         },
-        grid: { hoverable: true, labelMargin: 15 },
+        grid: {
+            hoverable: true,
+            labelMargin: 15,
+            markings: [ { xaxis: { from: middle, to: middle }, color: "#588CA8" }]
+        },
         pan: { interactive: false },
-        zoom: { interactive: false }
+        zoom: { interactive: false },
     };
     if (isAppleMobile) {
         // enable touch
@@ -137,47 +143,6 @@ function flotGraphLoadData($container, response) {
         this.bbox = bbox;
         this.ol_layer = null;
     }
-
-    var CssHideableWMS = OpenLayers.Class(OpenLayers.Layer.WMS, {
-        cssVisibility: true,
-
-        initialize: function (name, url, params, options) {
-            OpenLayers.Layer.WMS.prototype.initialize.apply(
-                this, [name, url, params, options]);
-            if (options.cssVisibility === true ||
-                options.cssVisibility === false) {
-                    this.cssVisibility = options.cssVisibility;
-            }
-            this.events.on({
-                'added': this.updateCssVisibility,
-                'moveend': this.updateCssVisibility,
-                scope: this});
-        },
-
-        destroy: function () {
-            this.events.un({
-                'added': this.updateCssVisibility,
-                'moveend': this.updateCssVisibility,
-                scope: this});
-            OpenLayers.Layer.WMS.prototype.destroy.apply(this);
-        },
-
-        setCssVisibility: function (visible) {
-            this.cssVisibility = visible;
-            this.updateCssVisibility();
-        },
-
-        updateCssVisibility: function () {
-            if (this.div) {
-                if (this.cssVisibility) {
-                    $(this.div).show();
-                }
-                else {
-                    $(this.div).hide();
-                }
-            }
-        }
-    });
 
     var CssHideableImageLayer = OpenLayers.Class(OpenLayers.Layer.Image, {
         cssVisibility: true,
@@ -321,12 +286,12 @@ function flotGraphLoadData($container, response) {
         if (lizard_neerslagradar.user_logged_in) {
             regional_layer = regional_layers[current_layer_idx];
         }
+        // console.log(current_layer.ol_layer.loading);
+
         // don't swap layers when we're still loading
         if ((!current_layer || !current_layer.ol_layer.loading) &&
-            (!paused_at_end) &&
-            (!lizard_neerslagradar.user_logged_in ||
-             !regional_layer ||
-             !regional_layer.ol_layer.loading)) {
+        (!paused_at_end) &&
+        (!lizard_neerslagradar.user_logged_in || !regional_layer || !regional_layer.ol_layer.loading)) {
             // figure out next layer
             var next_layer_idx = (current_layer_idx >= layers.length - 1) ?
                 0 : current_layer_idx + 1;
@@ -468,7 +433,13 @@ function flotGraphLoadData($container, response) {
             toggle();
         });
     }
-
+    function init_geolocation_button () {
+        $btn = $('.geolocation-btn');
+        $btn.click(function (e) {
+            zoomToGeolocation();
+            e.preventDefault();
+        });
+    }
     function init_progress () {
         $progressbar = $('#progressbar');
     }
@@ -591,10 +562,14 @@ function flotGraphLoadData($container, response) {
     $("#footer").prepend(powered_by);
     }
     function show_map(position) {
+        var projWGS84 = new OpenLayers.Projection("EPSG:4326");
+        var proj900913 = new OpenLayers.Projection("EPSG:900913");
         var latitude = position.coords.latitude;
         var longitude = position.coords.longitude;
-        var lonlat = OpenLayers.LonLat(longitude, latitude);
-        map.setCenter(lonlat, 11);
+        var lonlat = new OpenLayers.LonLat(longitude, latitude);
+        lonlat.transform(projWGS84, proj900913);
+        map.setCenter(lonlat);
+        map.zoomTo(11);
     }
     function zoomToGeolocation() {
         if (Modernizr.geolocation) {
@@ -609,10 +584,10 @@ function flotGraphLoadData($container, response) {
         init_button();
         init_slider();
         init_progress();
+        init_geolocation_button();
         init_cycle_layers();
         wait_until_first_layer_loaded();
         addPoweredBy();
-        zoomToGeolocation();
     }
     $(document).ready(init_neerslagradar);
 })();
