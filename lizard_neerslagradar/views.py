@@ -2,18 +2,20 @@ import datetime
 import logging
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.http import HttpResponseNotFound
 from django.template.loader import render_to_string
 from django.utils import simplejson as json
+from django.utils.translation import ugettext as _
 from django.views.generic.base import View
 from lizard_map.models import WorkspaceEdit
 from lizard_ui.layout import Action
 import dateutil
-import lizard_map.coordinates
-import lizard_map.views
 import pytz
 
+import lizard_map.coordinates
+import lizard_map.views
 from lizard_neerslagradar import netcdf
 from lizard_neerslagradar import models
 from lizard_neerslagradar import reproject
@@ -168,7 +170,22 @@ class DefaultView(NeerslagRadarView):
         if not self.user_logged_in():
             # Strip out the date range selector.
             actions = [action for action in actions
-                       if action.klass != 'popup-date-range']
+                       if action.klass not in ['popup-date-range',
+                                               'map-load-default-location']]
+        zoom_to_default = Action(
+            name='',
+            description=_('Zoom to default location'),
+            url=reverse('lizard_map.map_location_load_default'),
+            icon='icon-globe',
+            klass='map-load-default-location')
+        actions.insert(0, zoom_to_default)
+        geolocation = Action(
+            name='',
+            description=('Zoom to geo location'),
+            url="",
+            icon='icon-screenshot',
+            klass='geolocation-btn')
+        actions.insert(0, geolocation)
         return actions
 
 
