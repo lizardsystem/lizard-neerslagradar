@@ -5,7 +5,7 @@ Changelog of lizard-neerslagradar
 0.24 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Added geolocation functionality.
 
 
 0.23 (2015-07-08)
