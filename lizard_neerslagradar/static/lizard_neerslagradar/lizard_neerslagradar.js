@@ -286,8 +286,6 @@ function flotGraphLoadData($container, response) {
         if (lizard_neerslagradar.user_logged_in) {
             regional_layer = regional_layers[current_layer_idx];
         }
-        // console.log(current_layer.ol_layer.loading);
-
         // don't swap layers when we're still loading
         if ((!current_layer || !current_layer.ol_layer.loading) &&
         (!paused_at_end) &&
@@ -393,13 +391,13 @@ function flotGraphLoadData($container, response) {
     }
 
     function start () {
-        $btn.find('i').removeClass('icon-play').addClass('icon-pause');
+        $btn.find('i').removeClass('icon-pause').addClass('icon-play');
         $btn.addClass('active');
         cycle_layers_interval = setInterval(cycle_layers, interval_ms);
     }
 
     function stop () {
-        $btn.find('i').removeClass('icon-pause').addClass('icon-play');
+        $btn.find('i').removeClass('icon-play').addClass('icon-pause');
         $btn.removeClass('active');
         clearInterval(cycle_layers_interval);
         cycle_layers_interval = null;
@@ -434,8 +432,8 @@ function flotGraphLoadData($container, response) {
         });
     }
     function init_geolocation_button () {
-        $btn = $('.geolocation-btn');
-        $btn.click(function (e) {
+        var button = $('.geolocation-btn');
+        button.click(function (e) {
             zoomToGeolocation();
             e.preventDefault();
         });
