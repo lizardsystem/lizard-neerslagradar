@@ -48,8 +48,8 @@ function flotGraphLoadData($container, response) {
                 lineWidth: 0,
                 show: true,
                 fillColor: { colors: ["#1facbd", "#115e67"] },
-                fill: 0.7
-            }
+                fill: 0.7,
+            },
         },
         yaxis: {
             zoomRange: [false, false],
@@ -62,7 +62,7 @@ function flotGraphLoadData($container, response) {
         grid: {
             hoverable: true,
             labelMargin: 15,
-            markings: [ { xaxis: { from: middle, to: middle }, color: "#588CA8" }]
+            markings: [ { xaxis: { from: middle, to: middle }, color: "#115e67" }]
         },
         pan: { interactive: false },
         zoom: { interactive: false },
@@ -136,7 +136,9 @@ function flotGraphLoadData($container, response) {
         $graph.bind("plothover", function (event, pos, item) {
             if (item) {
                 $("#graphtooltip").remove();
-                showGraphTooltip(item.pageX, item.pageY, item.datapoint);
+                var datapointData = item.datapoint;
+                datapointData[1] = Math.round(datapointData[1]*100)/100;
+                showGraphTooltip(item.pageX, item.pageY, datapointData);
             } else {
                 $("#graphtooltip").remove();
             }

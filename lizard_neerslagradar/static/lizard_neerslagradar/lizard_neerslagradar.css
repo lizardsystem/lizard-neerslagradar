@@ -85,3 +85,9 @@ div#footer {
   background-image: linear-gradient(to bottom, #188693, #115e67);
   background-repeat: repeat-x;
 }
+.ui-icon-closethick {
+    background-image: url(../jqueryui/smoothness/images/ui-icons_f2f4f4_256x240.png) !important;
+}
+.ui-state-hover {
+  background-image: linear-gradient(to bottom, #27d7e0, #1daab7) !important;
+}
