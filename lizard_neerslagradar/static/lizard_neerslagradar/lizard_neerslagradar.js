@@ -9,7 +9,7 @@ function setup_movable_dialog() {
         autoOpen: false,
         title: '',
         width: 600,
-        height: 250,
+        height: 290,
         zIndex: 10000,
         close: function (event, ui) {
             // clear contents on close
@@ -26,7 +26,7 @@ function setup_movable_dialog() {
         // make width 90% of the entire window
         options.width = $(window).width() * 0.9;
         // make height 80% of the entire window
-        options.height = $(window).height() * 0.8;
+        //options.height = $(window).height() * 0.8;
     }
     $('#movable-dialog').dialog(options);
 }
@@ -39,9 +39,17 @@ function flotGraphLoadData($container, response) {
     var dataset = data[0]['data']
     var middle = dataset[parseInt(dataset.length/2)][0];
     var defaultOpts = {
+        legend: { show: false },
         series: {
-            points: { show: true, hoverable: true, radius: 1 },
-            shadowSize: 0
+            points: { show: false, hoverable: true, radius: 1 },
+            shadowSize: 0,
+            bars: {
+                color: "red",
+                lineWidth: 0,
+                show: true,
+                fillColor: { colors: ["#1facbd", "#115e67"] },
+                fill: 0.7
+            }
         },
         yaxis: {
             zoomRange: [false, false],
@@ -74,7 +82,7 @@ function flotGraphLoadData($container, response) {
     var $graph_row = $('<div class="flot-graph-row" />')
         .css({
             position: 'absolute',
-            left: 0, top: 0, bottom: 48, right: 0
+            left: 0, top: 0, bottom: 0, right: 0
         });
     var $y_label_text_wrapper = $('<div/>')
         .css({
@@ -391,13 +399,13 @@ function flotGraphLoadData($container, response) {
     }
 
     function start () {
-        $btn.find('i').removeClass('icon-pause').addClass('icon-play');
+        $btn.find('i').removeClass('icon-play').addClass('icon-pause');
         $btn.addClass('active');
         cycle_layers_interval = setInterval(cycle_layers, interval_ms);
     }
 
     function stop () {
-        $btn.find('i').removeClass('icon-play').addClass('icon-pause');
+        $btn.find('i').removeClass('icon-pause').addClass('icon-play');
         $btn.removeClass('active');
         clearInterval(cycle_layers_interval);
         cycle_layers_interval = null;

@@ -3,6 +3,10 @@
     margin-right: 0;
     padding-right: 0;
 }
+#breadcrumbs {
+    margin-right: 0;
+    padding-right: 0;
+}
 body{
     width: 100%;
 }
@@ -25,8 +29,8 @@ div#progressbar {
 div#timeslider {
     height: 0.8em;
     margin-top: 14px;
-    width: 117px;
-    margin-left: 18px;
+    width: 100px;
+    margin-left: 12px;
     margin-right: 9px;
 }
 
@@ -75,4 +79,9 @@ div#footer {
     image-rendering:-webkit-optimize-contrast;  /* Chrome (and eventually Safari) */
     image-rendering:crisp-edges;                /* CSS3 Proposed                  */
     -ms-interpolation-mode:bicubic;             /* IE8+                           */
+}
+.ui-widget-header {
+  background-color: #157681;
+  background-image: linear-gradient(to bottom, #188693, #115e67);
+  background-repeat: repeat-x;
 }

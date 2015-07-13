@@ -5,7 +5,7 @@ Changelog of lizard-neerslagradar
 0.26 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Updated styling of popup, removed layer choice.
 
 
 0.25 (2015-07-09)
