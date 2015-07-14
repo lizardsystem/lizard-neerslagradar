@@ -321,7 +321,6 @@ class NeerslagRadarAdapter(workspace.WorkspaceItemAdapter):
                 "lizard_map_adapter_flot_graph_data", (identifier,))
 
             values = self.values(identifier, start_date_utc, end_date_utc)
-
             infoname = self._grid_name(
                 identifier['region_name'], identifier['identifier'])
 

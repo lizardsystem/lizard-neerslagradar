@@ -36,7 +36,7 @@ function flotGraphLoadData($container, response) {
         $container.html('Geen gegevens beschikbaar.');
         return;
     }
-    var dataset = data[0]['data']
+    var dataset = data[0].data;
     var middle = dataset[parseInt(dataset.length/2)][0];
     var defaultOpts = {
         legend: { show: false },
@@ -62,10 +62,12 @@ function flotGraphLoadData($container, response) {
         grid: {
             hoverable: true,
             labelMargin: 15,
-            markings: [ { xaxis: { from: middle, to: middle }, color: "#588CA8" }]
+            markings: [
+                { xaxis: { from: middle, to: middle }, color: "#115e67" }
+            ]
         },
         pan: { interactive: false },
-        zoom: { interactive: false },
+        zoom: { interactive: false }
     };
     if (isAppleMobile) {
         // enable touch
@@ -136,7 +138,9 @@ function flotGraphLoadData($container, response) {
         $graph.bind("plothover", function (event, pos, item) {
             if (item) {
                 $("#graphtooltip").remove();
-                showGraphTooltip(item.pageX, item.pageY, item.datapoint);
+                var datapointData = item.datapoint;
+                datapointData[1] = Math.round(datapointData[1]*100)/100;
+                showGraphTooltip(item.pageX, item.pageY, datapointData);
             } else {
                 $("#graphtooltip").remove();
             }
@@ -241,16 +245,9 @@ function flotGraphLoadData($container, response) {
     var full_bbox = new OpenLayers.Bounds(
         lizard_neerslagradar.fixed_image_layer_bbox.split(','));
 
-    var regional_bbox = full_bbox;
-
     for (var i=0; i < lizard_neerslagradar.animation_datetimes.length; i++) {
         var dt = moment(lizard_neerslagradar.animation_datetimes[i].datetime);
-        if (lizard_neerslagradar.user_logged_in) {
-            layers.push(new MyLayer(dt, 0.2, full_bbox));
-            regional_layers.push(new MyLayer(dt, 0.6, regional_bbox));
-        } else {
-            layers.push(new MyLayer(dt, 0.6, full_bbox));
-        }
+        layers.push(new MyLayer(dt, 0.6, full_bbox));
     }
 
     var layers_loading = 0;
@@ -265,20 +262,10 @@ function flotGraphLoadData($container, response) {
             if (current_layer_idx != -1) {
                 var current_layer = layers[current_layer_idx];
                 current_layer.ol_layer.setCssVisibility(false);
-                if (lizard_neerslagradar.user_logged_in) {
-                    current_layer = regional_layers[current_layer_idx];
-                    current_layer.ol_layer.setCssVisibility(false);
-                }
             }
             if (layer_idx != -1) {
                 var layer = layers[layer_idx];
                 layer.ol_layer.setCssVisibility(true);
-                if (lizard_neerslagradar.user_logged_in) {
-                    layer = regional_layers[layer_idx];
-                    if (layer && layer.ol_layer) {
-                        layer.ol_layer.setCssVisibility(true);
-                    }
-                }
             }
 
             // update with next layer index
@@ -291,24 +278,20 @@ function flotGraphLoadData($container, response) {
     function cycle_layers () {
         var current_layer = layers[current_layer_idx];
         var regional_layer;
-        if (lizard_neerslagradar.user_logged_in) {
-            regional_layer = regional_layers[current_layer_idx];
-        }
         // don't swap layers when we're still loading
         if ((!current_layer || !current_layer.ol_layer.loading) &&
-        (!paused_at_end) &&
-        (!lizard_neerslagradar.user_logged_in || !regional_layer || !regional_layer.ol_layer.loading)) {
+            (!paused_at_end) ) {
             // figure out next layer
             var next_layer_idx = (current_layer_idx >= layers.length - 1) ?
                 0 : current_layer_idx + 1;
             if (next_layer_idx === 0) {
-              paused_at_end = true;
-              window.setTimeout(function(){
-                paused_at_end = false;
-                set_layer(0);
-              }, 1000);
+                paused_at_end = true;
+                window.setTimeout(function(){
+                    paused_at_end = false;
+                    set_layer(0);
+                }, 1000);
             } else {
-              set_layer(next_layer_idx);
+                set_layer(next_layer_idx);
             }
         }
     }
@@ -368,9 +351,6 @@ function flotGraphLoadData($container, response) {
         };
 
         $.each(layers, init_layer);
-        if (lizard_neerslagradar.user_logged_in) {
-            $.each(regional_layers, init_layer);
-        }
     }
 
     function on_layer_changed () {
@@ -493,8 +473,8 @@ function flotGraphLoadData($container, response) {
 
     function set_progress (ratio) {
         // clamp ratio
-        if (ratio < 0) ratio = 0;
-        if (ratio >= 1) ratio = 1;
+        if (ratio < 0) { ratio = 0; }
+        if (ratio >= 1) { ratio = 1; }
 
         var is_ready = ratio == 1;
         if (is_ready) {
@@ -532,35 +512,6 @@ function flotGraphLoadData($container, response) {
         wait_interval = setInterval(tick, 1000);
     }
 
-    function init_overview() {
-        var overview_options = {
-            size: new OpenLayers.Size(200, 250),
-            maximized: true,
-            mapOptions: {
-                // World Extent
-                // restrictedExtent: new OpenLayers.Bounds(
-                // -20037508.34, -8400000.00,
-                // 20037508.34, 15000000.00
-                // ),
-                restrictedExtent: new OpenLayers.Bounds(
-                    388076.83040199202, 6586328.309563829,
-                    760954.7013451669, 7023311.813260503
-                ),
-                projection: 'EPSG:3857',
-                theme: null // KEEP THIS, to prevent OL from dynamically adding
-                            // its CSS
-            }
-        };
-        var overview_map = new StaticOverviewMap(overview_options);
-        map.addControl(overview_map);
-
-        var mouse_position = new OpenLayers.Control.MousePosition({
-            align: 'left',
-            displayProjection: 'EPSG:3857'
-        });
-        map.addControl(mouse_position);
-    }
-
     function addPoweredBy(){
     var powered_by = '<p class="neerslagradar_poweredby">Powered by:  ' +
                      '&nbspRoyal Haskoning DHV&nbsp  |  ' +
@@ -583,7 +534,6 @@ function flotGraphLoadData($container, response) {
         }
     }
     function init_neerslagradar () {
-        // init_overview();
         var dt_start = moment.utc().subtract('hours', 3);
         var dt_end = moment.utc().add('hours', 3);
         set_view_state({dt_start: dt_start, dt_end: dt_end});
