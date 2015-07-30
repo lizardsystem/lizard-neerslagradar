@@ -8,6 +8,12 @@ Changelog of lizard-neerslagradar
 - Nothing changed yet.
 
 
+1.0.1 (2015-07-14)
+------------------
+
+- Nothing changed yet.
+
+
 1.0 (2015-07-14)
 ----------------
 

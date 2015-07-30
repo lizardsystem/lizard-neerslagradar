@@ -534,6 +534,7 @@ function flotGraphLoadData($container, response) {
         }
     }
     function init_neerslagradar () {
+        map.removeControl(map.controls[0]);
         var dt_start = moment.utc().subtract('hours', 3);
         var dt_end = moment.utc().add('hours', 3);
         set_view_state({dt_start: dt_start, dt_end: dt_end});
