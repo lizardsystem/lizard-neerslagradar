@@ -30,7 +30,6 @@ from lizard_rainapp.calculations import rain_stats
 from lizard_rainapp.calculations import t_to_string
 from nens_graph.rainapp import RainappGraph
 import mapnik
-import openradar.utils
 import pytz
 
 from lizard_neerslagradar import dates
