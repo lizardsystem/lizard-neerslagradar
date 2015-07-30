@@ -5,7 +5,7 @@ Changelog of lizard-neerslagradar
 1.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- And remove openradar imports, too.
 
 
 1.0.2 (2015-07-30)
