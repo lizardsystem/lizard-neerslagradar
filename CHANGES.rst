@@ -2,8 +2,8 @@ Changelog of lizard-neerslagradar
 ===================================================
 
 
-1.1 (unreleased)
-----------------
+1.0.2 (2015-07-30)
+------------------
 
 - Remove openradar & pydap dependencies
 
